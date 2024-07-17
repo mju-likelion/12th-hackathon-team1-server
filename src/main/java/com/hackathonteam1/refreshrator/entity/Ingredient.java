@@ -20,7 +20,7 @@ public class Ingredient extends BaseEntity{
     @OneToMany(cascade = CascadeType.PERSIST, mappedBy = "ingredient", fetch = FetchType.LAZY)
     private List<FridgeItem> fridgeItems;
 
-    @OneToMany(cascade = CascadeType.PERSIST, mappedBy = "ingredient", fetch = FetchType.LAZY)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "ingredient", fetch = FetchType.LAZY)
     private List<IngredientRecipe> ingredientRecipes;
 
 }
