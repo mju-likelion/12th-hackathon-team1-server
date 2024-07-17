@@ -16,12 +16,14 @@ import java.time.LocalDate;
 public class FridgeItem extends BaseEntity{
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @JoinColumn(name = "fridge_id", nullable = false)
     private Fridge fridge;
 
-    @ManyToOne(optional = false, fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @JoinColumn(name = "ingredient_id", nullable = false)
     private Ingredient ingredient;
 
-    @Column()
+    @Column(nullable = false)
     private LocalDate expiredDate;
 
     @Column
@@ -33,9 +35,6 @@ public class FridgeItem extends BaseEntity{
 
     @Column
     private String memo;
-
-    @Column
-    private boolean expired;
 
     public enum Storage{
         STORE_AT_ROOM_TEMPERATURE, REFRIGERATED, FROZEN;
