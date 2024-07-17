@@ -24,13 +24,6 @@ public class User extends BaseEntity{
     @Column(nullable = false)
     private String password;
 
-    @Column(nullable = false)
-    private String nickName;
-
-    @OneToOne(mappedBy = "user")
-    @JoinColumn(name = "fridge_id")
-    private Fridge fridge;
-
     @OneToMany(mappedBy = "user", cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
     private List<Recipe> recipes;
 
