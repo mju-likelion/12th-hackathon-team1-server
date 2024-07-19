@@ -15,10 +15,14 @@ public enum ErrorCode {
     EMAIL("4004", "이메일 형식이 유효하지 않습니다."),
 
     //AuthorizedException
+    COOKIE_NOT_FOUND("4010", "쿠키를 찾을 수 없습니다."),
+    INVALID_TOKEN("4011", "유효하지 않은 토큰입니다."),
+    INVALID_PASSWORD("4012","검증되지 않은 비밀번호입니다."),
 
     //ForbiddenException
 
     //NotFoundException
+    USERID_NOT_FOUND("4040","존재하지 않는 사용자 입니다"),
 
     //ConflictException
     DUPLICATED_EMAIL("4090", "이미 사용 중인 이메일입니다.");
