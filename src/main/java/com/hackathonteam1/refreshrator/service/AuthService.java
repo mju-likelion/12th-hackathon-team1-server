@@ -1,8 +1,14 @@
 package com.hackathonteam1.refreshrator.service;
 
+import com.hackathonteam1.refreshrator.authentication.JwtTokenProvider;
+import com.hackathonteam1.refreshrator.authentication.PasswordHashEncryption;
+import com.hackathonteam1.refreshrator.dto.request.LoginDto;
 import com.hackathonteam1.refreshrator.dto.request.SigninDto;
+import com.hackathonteam1.refreshrator.dto.response.TokenResponseDto;
 import com.hackathonteam1.refreshrator.entity.User;
 import com.hackathonteam1.refreshrator.exception.ConflictException;
+import com.hackathonteam1.refreshrator.exception.ForbiddenException;
+import com.hackathonteam1.refreshrator.exception.NotFoundException;
 import com.hackathonteam1.refreshrator.exception.errorcode.ErrorCode;
 import com.hackathonteam1.refreshrator.repository.UserRepository;
 import lombok.AllArgsConstructor;
@@ -12,23 +18,50 @@ import org.springframework.stereotype.Service;
 @AllArgsConstructor
 public class AuthService {
     private final UserRepository userRepository;
+    private final PasswordHashEncryption passwordHashEncryption;
+    private final JwtTokenProvider jwtTokenProvider;
 
     //회원가입
     public void signin(SigninDto signinDto){
 
         //아이디(이메일) 중복 방지
-        if(userRepository.findByEmail(signinDto.getEmail()).isPresent()){
+        User user=userRepository.findByEmail(signinDto.getEmail());
+        if(user!=null){
             throw new ConflictException(ErrorCode.DUPLICATED_EMAIL);
         }
 
         //비밀번호 암호화
+        String plainPassword = signinDto.getPassword();
+        String hashedPassword = passwordHashEncryption.encrypt(plainPassword);
 
         //유저 생성과 등록
-        User user=User.builder()
+        User loginUser=User.builder()
                 .name(signinDto.getName())
                 .email(signinDto.getEmail())
-                .password(signinDto.getPassword())
+                .password(hashedPassword)
                 .build();
-        userRepository.save(user);
+        userRepository.save(loginUser);
+    }
+
+    //로그인
+    public TokenResponseDto login(LoginDto loginDto){
+
+        //아이디(이메일)검사
+        User user=userRepository.findByEmail(loginDto.getEmail());
+
+        if(user==null){
+            throw new NotFoundException(ErrorCode.USERID_NOT_FOUND);
+        }
+
+        //비밀번호가 입력한 아이디에 일치하는지 검사
+        if(!passwordHashEncryption.matches(loginDto.getPassword(), user.getPassword())){
+            throw new ForbiddenException(ErrorCode.INVALID_PASSWORD);
+        }
+
+        //토큰 생성
+        String payload = String.valueOf(user.getId());
+        String accessToken = jwtTokenProvider.createToken(payload);
+
+        return new TokenResponseDto(accessToken);
     }
 }
