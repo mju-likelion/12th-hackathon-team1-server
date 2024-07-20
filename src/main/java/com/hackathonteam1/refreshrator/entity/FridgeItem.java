@@ -1,10 +1,7 @@
 package com.hackathonteam1.refreshrator.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDate;
 
@@ -13,6 +10,7 @@ import java.time.LocalDate;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class FridgeItem extends BaseEntity{
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
