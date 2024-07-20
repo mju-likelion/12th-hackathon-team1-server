@@ -5,11 +5,13 @@ import com.hackathonteam1.refreshrator.authentication.PasswordHashEncryption;
 import com.hackathonteam1.refreshrator.dto.request.LoginDto;
 import com.hackathonteam1.refreshrator.dto.request.SigninDto;
 import com.hackathonteam1.refreshrator.dto.response.TokenResponseDto;
+import com.hackathonteam1.refreshrator.entity.Fridge;
 import com.hackathonteam1.refreshrator.entity.User;
 import com.hackathonteam1.refreshrator.exception.ConflictException;
 import com.hackathonteam1.refreshrator.exception.ForbiddenException;
 import com.hackathonteam1.refreshrator.exception.NotFoundException;
 import com.hackathonteam1.refreshrator.exception.errorcode.ErrorCode;
+import com.hackathonteam1.refreshrator.repository.FridgeRepository;
 import com.hackathonteam1.refreshrator.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,6 +20,7 @@ import org.springframework.stereotype.Service;
 @AllArgsConstructor
 public class AuthService {
     private final UserRepository userRepository;
+    private final FridgeRepository fridgeRepository;
     private final PasswordHashEncryption passwordHashEncryption;
     private final JwtTokenProvider jwtTokenProvider;
 
@@ -35,12 +38,18 @@ public class AuthService {
         String hashedPassword = passwordHashEncryption.encrypt(plainPassword);
 
         //유저 생성과 등록
-        User loginUser=User.builder()
+        User signinUser=User.builder()
                 .name(signinDto.getName())
                 .email(signinDto.getEmail())
                 .password(hashedPassword)
                 .build();
-        userRepository.save(loginUser);
+        userRepository.save(signinUser);
+
+        //냉장고 생성
+        Fridge fridge= Fridge.builder()
+                .user(signinUser)
+                .build();
+        fridgeRepository.save(fridge);
     }
 
     //로그인
