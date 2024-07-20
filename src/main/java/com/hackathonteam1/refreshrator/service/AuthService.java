@@ -2,10 +2,9 @@ package com.hackathonteam1.refreshrator.service;
 
 import com.hackathonteam1.refreshrator.authentication.JwtTokenProvider;
 import com.hackathonteam1.refreshrator.authentication.PasswordHashEncryption;
-import com.hackathonteam1.refreshrator.dto.request.LoginDto;
-import com.hackathonteam1.refreshrator.dto.request.SigninDto;
-import com.hackathonteam1.refreshrator.dto.response.TokenResponseDto;
-import com.hackathonteam1.refreshrator.entity.Fridge;
+import com.hackathonteam1.refreshrator.dto.request.auth.LoginDto;
+import com.hackathonteam1.refreshrator.dto.request.auth.SigninDto;
+import com.hackathonteam1.refreshrator.dto.response.auth.TokenResponseDto;
 import com.hackathonteam1.refreshrator.entity.User;
 import com.hackathonteam1.refreshrator.exception.ConflictException;
 import com.hackathonteam1.refreshrator.exception.ForbiddenException;

@@ -23,6 +23,7 @@ public enum ErrorCode {
 
     //NotFoundException
     USERID_NOT_FOUND("4040","존재하지 않는 사용자 입니다"),
+    INGREDIENT_NOT_FOUND("4041", "재료를 찾을 수 없습니다."),
 
     //ConflictException
     DUPLICATED_EMAIL("4090", "이미 사용 중인 이메일입니다.");
