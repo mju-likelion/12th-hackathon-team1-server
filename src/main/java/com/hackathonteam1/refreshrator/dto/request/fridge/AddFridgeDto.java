@@ -15,7 +15,7 @@ public class AddFridgeDto {
 
     //재료
     @NotNull
-    private UUID ingredient;
+    private UUID ingredientId;
 
     //유통기한 설정
     @NotNull

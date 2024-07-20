@@ -13,8 +13,6 @@ import com.hackathonteam1.refreshrator.repository.IngredientRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.UUID;
-
 @Service
 @AllArgsConstructor
 public class FridgeService {
@@ -26,7 +24,7 @@ public class FridgeService {
     public void addIngredientInFridge(AddFridgeDto addFridgeDto, User user){
 
         //재료 찾기
-        Ingredient ingredient=ingredientRepository.findById(addFridgeDto.getIngredient())
+        Ingredient ingredient=ingredientRepository.findById(addFridgeDto.getIngredientId())
                 .orElseThrow(()-> new NotFoundException(ErrorCode.INGREDIENT_NOT_FOUND));
 
         //냉장고 찾기

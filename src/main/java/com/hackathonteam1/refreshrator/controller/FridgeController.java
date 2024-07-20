@@ -5,7 +5,9 @@ import com.hackathonteam1.refreshrator.dto.ResponseDto;
 import com.hackathonteam1.refreshrator.dto.request.fridge.AddFridgeDto;
 import com.hackathonteam1.refreshrator.entity.User;
 import com.hackathonteam1.refreshrator.service.FridgeService;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import lombok.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,7 +24,7 @@ public class FridgeController {
 
     //냉장고에 재료 추가
     @PostMapping("/ingredients")
-    public ResponseEntity<ResponseDto<Void>> addIngredientInFridge(@RequestBody AddFridgeDto addFridgeDto , @AuthenticatedUser User user){
+    public ResponseEntity<ResponseDto<Void>> addIngredientInFridge(@RequestBody @Valid AddFridgeDto addFridgeDto , @AuthenticatedUser User user){
         fridgeService.addIngredientInFridge(addFridgeDto,user);
         return new ResponseEntity<>(ResponseDto.res(HttpStatus.CREATED,"냉장고에 재료 등록 성공"),HttpStatus.CREATED);
     }
