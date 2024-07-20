@@ -2,6 +2,7 @@ package com.hackathonteam1.refreshrator.dto.request.fridge;
 
 import com.hackathonteam1.refreshrator.entity.FridgeItem;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -13,19 +14,19 @@ import java.util.UUID;
 public class AddFridgeDto {
 
     //재료
-    @NotBlank
+    @NotNull
     private UUID ingredient;
 
     //유통기한 설정
-    @NotBlank
+    @NotNull
     private LocalDate expiredDate;
 
     //수량 설정
-    @NotBlank
-    private int quantity;
+    @NotNull
+    private Integer quantity;
 
     //보관 방법
-    @NotBlank
+    @NotNull
     private String storage;
 
     //메모
