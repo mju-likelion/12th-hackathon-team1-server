@@ -1,5 +1,7 @@
-package com.hackathonteam1.refreshrator.authentication;
+package com.hackathonteam1.refreshrator.annotation.config;
 
+import com.hackathonteam1.refreshrator.annotation.resolver.AuthenticatedUserArgumentResolver;
+import com.hackathonteam1.refreshrator.authentication.AuthenticationInterceptor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
