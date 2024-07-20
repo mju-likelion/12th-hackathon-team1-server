@@ -13,6 +13,7 @@ public enum ErrorCode {
     NOT_BLANK("4002", "필수값이 공백입니다."),
     LENGTH("4003", "길이가 유효하지 않습니다."),
     EMAIL("4004", "이메일 형식이 유효하지 않습니다."),
+    NOT_NULL("4005", "필수값이 공백입니다."),
 
     //AuthorizedException
     COOKIE_NOT_FOUND("4010", "쿠키를 찾을 수 없습니다."),
@@ -42,6 +43,7 @@ public enum ErrorCode {
             case "NotBlank" -> NOT_BLANK;
             case "Length" -> LENGTH;
             case "Email" -> EMAIL;
+            case "NotNull" -> NOT_NULL;
             default -> throw new IllegalArgumentException("Unexpected value: "+ code);
         };
     }
