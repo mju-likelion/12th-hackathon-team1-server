@@ -13,6 +13,7 @@ import org.springframework.jdbc.support.MetaDataAccessException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @Slf4j
@@ -21,12 +22,12 @@ public class ExceptionController {
 
     @ExceptionHandler(CustomException.class)
     public ResponseEntity<ErrorResponseDto> handleCustomException(CustomException customException){
-         writeLog(customException);
+        writeLog(customException);
         HttpStatus httpStatus = this.resolveHttpStatus(customException);
         return new ResponseEntity<>(ErrorResponseDto.res(customException), httpStatus);
     }
 
-    @ExceptionHandler({ValidationException.class, MetaDataAccessException.class})
+    @ExceptionHandler({ValidationException.class, MethodArgumentNotValidException.class})
     public ResponseEntity<ErrorResponseDto> handleCustomException(MethodArgumentNotValidException methodArgumentNotValidException){
         FieldError fieldError = methodArgumentNotValidException.getBindingResult().getFieldError();
         if(fieldError == null){
@@ -44,6 +45,16 @@ public class ExceptionController {
     public ResponseEntity<ErrorResponseDto> handleEntityNotFoundException(EntityNotFoundException entityNotFoundException){
         writeLog(entityNotFoundException);
         return new ResponseEntity<>(ErrorResponseDto.res(String.valueOf(HttpStatus.NOT_FOUND.value()),entityNotFoundException), HttpStatus.NOT_FOUND);
+    }
+
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponseDto> handleExceptioon(Exception exception){
+        this.writeLog(exception);
+        return new ResponseEntity<>(
+                ErrorResponseDto.res(String.valueOf(HttpStatus.INTERNAL_SERVER_ERROR.value()), exception),
+                HttpStatus.INTERNAL_SERVER_ERROR
+        );
     }
 
     private void writeLog(CustomException customException){
