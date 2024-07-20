@@ -29,4 +29,11 @@ public class Recipe extends BaseEntity{
     @JoinColumn(name = "image_id")
     private Image image;
 
+    public void updateName(String name){
+        this.name = name;
+    }
+    public void updateCookingStep(String cookingStep){
+        this.cookingStep = cookingStep;
+    }
+
 }
