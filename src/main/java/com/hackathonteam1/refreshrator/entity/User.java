@@ -30,4 +30,7 @@ public class User extends BaseEntity{
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<RecipeLike> recipeLikes;
 
+    @OneToMany(mappedBy = "user",cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
+    private List<FridgeItem> fridgeItems;
+
 }
