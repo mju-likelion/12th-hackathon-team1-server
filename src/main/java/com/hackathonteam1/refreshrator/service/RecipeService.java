@@ -18,4 +18,6 @@ public interface RecipeService {
 
     public void modifyContent(ModifyRecipeDto modifyRecipeDto, User user, UUID recipeId);
 
+    public void registerIngredientRecipe(User user, UUID recipeId, UUID ingredientId);
+
 }
