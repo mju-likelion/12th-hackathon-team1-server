@@ -2,6 +2,7 @@ package com.hackathonteam1.refreshrator.authentication;
 
 import com.hackathonteam1.refreshrator.entity.User;
 import com.hackathonteam1.refreshrator.exception.NotFoundException;
+import com.hackathonteam1.refreshrator.exception.UnauthorizedException;
 import com.hackathonteam1.refreshrator.exception.errorcode.ErrorCode;
 import com.hackathonteam1.refreshrator.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
@@ -35,6 +36,6 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
 
     private User findExistingUser(final UUID userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException(ErrorCode.USERID_NOT_FOUND));
+                .orElseThrow(() -> new UnauthorizedException(ErrorCode.INVALID_TOKEN));
     }
 }
