@@ -7,13 +7,11 @@ import com.hackathonteam1.refreshrator.entity.User;
 import com.hackathonteam1.refreshrator.service.FridgeService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import lombok.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RestController
 @AllArgsConstructor
@@ -24,8 +22,15 @@ public class FridgeController {
 
     //냉장고에 재료 추가
     @PostMapping("/ingredients")
-    public ResponseEntity<ResponseDto<Void>> addIngredientInFridge(@RequestBody @Valid AddFridgeDto addFridgeDto , @AuthenticatedUser User user){
-        fridgeService.addIngredientInFridge(addFridgeDto,user);
-        return new ResponseEntity<>(ResponseDto.res(HttpStatus.CREATED,"냉장고에 재료 등록 성공"),HttpStatus.CREATED);
+    public ResponseEntity<ResponseDto<Void>> addIngredientInFridge(@RequestBody @Valid AddFridgeDto addFridgeDto, @AuthenticatedUser User user) {
+        fridgeService.addIngredientInFridge(addFridgeDto, user);
+        return new ResponseEntity<>(ResponseDto.res(HttpStatus.CREATED, "냉장고에 재료 등록 성공"), HttpStatus.CREATED);
+    }
+
+    //재료 정보 수정
+    @PatchMapping("/ingredients/{ingredient_id}")
+    public ResponseEntity<ResponseDto<Void>> updateIngredientInFridge(@PathVariable("ingredient_id") UUID id , @RequestBody @Valid AddFridgeDto addFridgeDto, @AuthenticatedUser User user) {
+        fridgeService.updateIngredientInFridge(id,addFridgeDto, user);
+        return new ResponseEntity<>(ResponseDto.res(HttpStatus.OK, "냉장고에 재료 수정 성공"), HttpStatus.OK);
     }
 }
