@@ -37,7 +37,7 @@ public class FridgeService {
                 .ingredient(ingredient)
                 .expiredDate(addFridgeDto.getExpiredDate())
                 .quantity(addFridgeDto.getQuantity())
-                .storage(findStorage(addFridgeDto.getStorage()))
+                .storage(defindStorage(addFridgeDto.getStorage()))
                 .memo(addFridgeDto.getMemo())
                 .build();
 
@@ -45,7 +45,7 @@ public class FridgeService {
         fridgeItemRepository.save(fridgeItem);
     }
 
-    private FridgeItem.Storage findStorage(String storage){
+    private FridgeItem.Storage defindStorage(String storage){
         return switch (storage){
             case "상온"-> FridgeItem.Storage.STORE_AT_ROOM_TEMPERATURE;
             case "냉동"-> FridgeItem.Storage.FROZEN;
