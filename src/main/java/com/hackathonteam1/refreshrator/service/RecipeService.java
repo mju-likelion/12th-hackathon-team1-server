@@ -1,5 +1,6 @@
 package com.hackathonteam1.refreshrator.service;
 
+import com.hackathonteam1.refreshrator.dto.request.recipe.ModifyRecipeDto;
 import com.hackathonteam1.refreshrator.dto.request.recipe.RegisterRecipeDto;
 import com.hackathonteam1.refreshrator.dto.response.recipe.DetailRecipeDto;
 import com.hackathonteam1.refreshrator.entity.User;
@@ -14,5 +15,7 @@ public interface RecipeService {
 
     //레시피 상세조회
     public DetailRecipeDto getDetail(UUID recipeId);
+
+    public void modifyContent(ModifyRecipeDto modifyRecipeDto, User user, UUID recipeId);
 
 }
