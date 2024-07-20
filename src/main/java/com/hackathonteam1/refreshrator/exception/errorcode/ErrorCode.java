@@ -21,6 +21,7 @@ public enum ErrorCode {
     INVALID_PASSWORD("4012","검증되지 않은 비밀번호입니다."),
 
     //ForbiddenException
+    RECIPE_FORBIDDEN("4030","해당 레시피에 대한 권한이 없습니다."),
 
     //NotFoundException
     USERID_NOT_FOUND("4040","존재하지 않는 사용자 입니다"),
