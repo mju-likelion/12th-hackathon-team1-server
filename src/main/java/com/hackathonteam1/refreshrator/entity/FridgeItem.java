@@ -21,6 +21,11 @@ public class FridgeItem extends BaseEntity{
     @JoinColumn(name = "ingredient_id", nullable = false)
     private Ingredient ingredient;
 
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
+
     @Column(nullable = false)
     private LocalDate expiredDate;
 
