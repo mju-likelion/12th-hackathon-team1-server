@@ -14,7 +14,7 @@ public class JwtEncoder {
 
     public static String encodeJwtToken(String token){
         String cookieValue = TOKEN_TYPE+token;
-        return URLEncoder.encode(cookieValue, StandardCharsets.UTF_8).replace("\\", "%20");
+        return URLEncoder.encode(cookieValue, StandardCharsets.UTF_8).replace("+", "%20");
     }
 
     public static String decodeJwtBearerToken(String cookieValue){
