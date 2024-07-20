@@ -1,4 +1,4 @@
-package com.hackathonteam1.refreshrator.annotation.config;
+package com.hackathonteam1.refreshrator.config;
 
 import com.hackathonteam1.refreshrator.annotation.resolver.AuthenticatedUserArgumentResolver;
 import com.hackathonteam1.refreshrator.authentication.AuthenticationInterceptor;
@@ -21,7 +21,7 @@ public class AuthenticationConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(final InterceptorRegistry registry) {
         registry.addInterceptor(authenticationInterceptor)
-                .addPathPatterns("/fridge/**")
+                .addPathPatterns("/fridge/**","/recipes/**")
                 .excludePathPatterns("/auth/signin", "/auth/login","/auth/logout");
     }
 
