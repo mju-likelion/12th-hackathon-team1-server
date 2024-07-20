@@ -1,5 +1,6 @@
 package com.hackathonteam1.refreshrator.exception.errorcode;
 
+import com.hackathonteam1.refreshrator.entity.Recipe;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -31,7 +32,8 @@ public enum ErrorCode {
     FRIDGE_NOT_FOUND("4044","냉장고를 찾을 수 없습니다"),
 
     //ConflictException
-    DUPLICATED_EMAIL("4090", "이미 사용 중인 이메일입니다.");
+    DUPLICATED_EMAIL("4090", "이미 사용 중인 이메일입니다."),
+    RECIPE_INGREDIENT_CONFLICT("4091", "이미 해당 레시피에 존재하는 재료입니다.");
 
 
     private final String code;
