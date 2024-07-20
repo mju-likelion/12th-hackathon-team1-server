@@ -1,4 +1,4 @@
-package com.hackathonteam1.refreshrator.dto.response;
+package com.hackathonteam1.refreshrator.dto.response.auth;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
