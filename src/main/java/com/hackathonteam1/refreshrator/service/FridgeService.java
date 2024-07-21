@@ -46,11 +46,11 @@ public class FridgeService {
         fridgeItemRepository.save(fridgeItem);
     }
 
+    //냉장고에 재료 정보 수정 메서드
     public void updateIngredientInFridge(UUID id, AddFridgeDto addFridgeDto, User user){
 
         //수정할 재료 찾기
-        FridgeItem fridgeItem=fridgeItemRepository.findById(id)
-                .orElseThrow(()-> new NotFoundException(ErrorCode.FRIDGE_ITEM_NOT_FOUND));
+        FridgeItem fridgeItem=findFridgeItem(id);
 
         //유저가 등록한 재료인지 검사
         checkAuth(fridgeItem.getFridge().getUser(),user);
@@ -63,6 +63,18 @@ public class FridgeService {
 
         //저장하기
         fridgeItemRepository.save(fridgeItem);
+    }
+
+    //냉장고에 재료 삭제 메서드
+    public void deleteIngredientInFridge(UUID id, User user){
+        //삭제할 재료 찾기
+        FridgeItem fridgeItem=findFridgeItem(id);
+
+        //권한 확인
+        checkAuth(fridgeItem.getFridge().getUser(),user);
+
+        //삭제하기
+        fridgeItemRepository.delete(fridgeItem);
     }
 
     //저장방법 결정 메서드
@@ -84,6 +96,12 @@ public class FridgeService {
     private Fridge findFridge(User user){
         return fridgeRepository.findByUser(user)
                 .orElseThrow(()-> new NotFoundException(ErrorCode.FRIDGE_NOT_FOUND));
+    }
+
+    //냉장고에서 요청한 재료를 찾는 메서드
+    private FridgeItem findFridgeItem(UUID id){
+        return fridgeItemRepository.findById(id)
+                .orElseThrow(()-> new NotFoundException(ErrorCode.FRIDGE_ITEM_NOT_FOUND));
     }
 
     //권한 확인
