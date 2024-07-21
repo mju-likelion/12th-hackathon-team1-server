@@ -10,7 +10,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Getter
-public class IngredientRecipeDto {
+public class RegisterIngredientRecipesDto {
     @NotNull
     private List<UUID> ingredientIds;
 

@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class RecipeDto {
+public class ModifyRecipeDto {
 
     @Size(min = 1, max = 20)
     private String name;

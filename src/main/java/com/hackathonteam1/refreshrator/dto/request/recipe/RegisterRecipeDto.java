@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.UUID;
 
 @Getter
-@AllArgsConstructor
 public class RegisterRecipeDto {
 
     @Size(min = 1, max = 20)
