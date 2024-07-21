@@ -1,6 +1,7 @@
 package com.hackathonteam1.refreshrator.controller;
 
 import com.hackathonteam1.refreshrator.dto.ResponseDto;
+import com.hackathonteam1.refreshrator.dto.response.ingredient.IngredientDto;
 import com.hackathonteam1.refreshrator.dto.response.ingredient.IngredientListDto;
 import com.hackathonteam1.refreshrator.service.IngredientService;
 import lombok.AllArgsConstructor;
@@ -17,7 +18,7 @@ public class IngredientController {
 
     // DB에 있는 재료 전체 조회
     @GetMapping()
-    public ResponseEntity<ResponseDto<IngredientListDto>> addIngredientInFridge() {
+    public ResponseEntity<ResponseDto<IngredientListDto>> showAllIngredients() {
         IngredientListDto ingredientListDto = ingredientService.showAllIngredients();
         return new ResponseEntity<>(ResponseDto.res(HttpStatus.OK, "모든 재료 조회 성공", ingredientListDto), HttpStatus.OK);
     }
