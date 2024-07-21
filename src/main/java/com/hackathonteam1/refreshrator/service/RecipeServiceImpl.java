@@ -1,7 +1,8 @@
 package com.hackathonteam1.refreshrator.service;
 
-import com.hackathonteam1.refreshrator.dto.request.recipe.IngredientRecipeDto;
-import com.hackathonteam1.refreshrator.dto.request.recipe.RecipeDto;
+import com.hackathonteam1.refreshrator.dto.request.recipe.DeleteIngredientRecipesDto;
+import com.hackathonteam1.refreshrator.dto.request.recipe.RegisterIngredientRecipesDto;
+import com.hackathonteam1.refreshrator.dto.request.recipe.ModifyRecipeDto;
 import com.hackathonteam1.refreshrator.dto.request.recipe.RegisterRecipeDto;
 import com.hackathonteam1.refreshrator.dto.response.recipe.DetailRecipeDto;
 import com.hackathonteam1.refreshrator.entity.Ingredient;
@@ -22,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -61,15 +63,15 @@ public class RecipeServiceImpl implements RecipeService{
 
     //레시피명, 조리법 수정
     @Override
-    public void modifyContent(RecipeDto recipeDto, User user, UUID recipeId) {
+    public void modifyContent(ModifyRecipeDto modifyRecipeDto, User user, UUID recipeId) {
         Recipe recipe = findRecipeByRecipeId(recipeId);
         checkAuth(recipe.getUser(), user);
 
-        if(recipeDto.getName()!=null){
-            recipe.updateName(recipeDto.getName());
+        if(modifyRecipeDto.getName()!=null){
+            recipe.updateName(modifyRecipeDto.getName());
         }
-        if(recipeDto.getCookingStep()!=null) {
-            recipe.updateCookingStep(recipeDto.getCookingStep());
+        if(modifyRecipeDto.getCookingStep()!=null) {
+            recipe.updateCookingStep(modifyRecipeDto.getCookingStep());
         }
 
         recipeRepository.save(recipe);
@@ -78,7 +80,7 @@ public class RecipeServiceImpl implements RecipeService{
     //레시피 재료 등록
     @Override
     @Transactional
-    public void registerIngredientRecipe(User user, UUID recipeId, IngredientRecipeDto ingredientRecipeDto) {
+    public void registerIngredientRecipe(User user, UUID recipeId, RegisterIngredientRecipesDto registerIngredientRecipesDto) {
         Recipe recipe = findRecipeByRecipeId(recipeId);
         checkAuth(recipe.getUser(), user);
 
@@ -87,7 +89,7 @@ public class RecipeServiceImpl implements RecipeService{
 
         HashSet<Ingredient> existingIngredients = new HashSet<>(ingredients);
 
-        List<Ingredient> newIngredients = ingredientRecipeDto.nonDupIngredientIds().stream().map(i->
+        List<Ingredient> newIngredients = registerIngredientRecipesDto.nonDupIngredientIds().stream().map(i->
                 findIngredientByIngredientId(i)).collect(Collectors.toList());
 
         //기존에 레시피에 존재하던 재료인지 확인 후 추가
@@ -97,6 +99,25 @@ public class RecipeServiceImpl implements RecipeService{
             }
             registerRecipeIngredient(newIngredient, recipe);
         });
+    }
+
+    @Override
+    public void deleteIngredientRecipe(User user, UUID recipeId, DeleteIngredientRecipesDto deleteIngredientRecipesDto) {
+        Recipe recipe = findRecipeByRecipeId(recipeId);
+        checkAuth(recipe.getUser(),user);
+
+        //기존 레시피의 재료들
+        List<IngredientRecipe> existingIngredientRecipes = findAllIngredientRecipeByRecipe(recipe);
+
+        Set<UUID> existingIngredientRecipeIds = existingIngredientRecipes.stream().map(i->i.getId()).collect(Collectors.toSet());
+
+        deleteIngredientRecipesDto.nonDupIngredientIds().forEach(i -> {
+            if(!existingIngredientRecipeIds.contains(i)){
+                throw new NotFoundException(ErrorCode.INGREDIENT_RECIPE_NOT_FOUND);
+            }
+            ingredientRecipeRepository.deleteById(i);
+        });
+
     }
 
     private Ingredient findIngredientByIngredientId(UUID ingredientId){
