@@ -1,6 +1,7 @@
 package com.hackathonteam1.refreshrator.service;
 
-import com.hackathonteam1.refreshrator.dto.request.recipe.ModifyRecipeDto;
+import com.hackathonteam1.refreshrator.dto.request.recipe.IngredientRecipeDto;
+import com.hackathonteam1.refreshrator.dto.request.recipe.RecipeDto;
 import com.hackathonteam1.refreshrator.dto.request.recipe.RegisterRecipeDto;
 import com.hackathonteam1.refreshrator.dto.response.recipe.DetailRecipeDto;
 import com.hackathonteam1.refreshrator.entity.Ingredient;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -59,15 +61,15 @@ public class RecipeServiceImpl implements RecipeService{
 
     //레시피명, 조리법 수정
     @Override
-    public void modifyContent(ModifyRecipeDto modifyRecipeDto, User user, UUID recipeId) {
+    public void modifyContent(RecipeDto recipeDto, User user, UUID recipeId) {
         Recipe recipe = findRecipeByRecipeId(recipeId);
         checkAuth(recipe.getUser(), user);
 
-        if(modifyRecipeDto.getName()!=null){
-            recipe.updateName(modifyRecipeDto.getName());
+        if(recipeDto.getName()!=null){
+            recipe.updateName(recipeDto.getName());
         }
-        if(modifyRecipeDto.getCookingStep()!=null) {
-            recipe.updateCookingStep(modifyRecipeDto.getCookingStep());
+        if(recipeDto.getCookingStep()!=null) {
+            recipe.updateCookingStep(recipeDto.getCookingStep());
         }
 
         recipeRepository.save(recipe);
@@ -75,19 +77,26 @@ public class RecipeServiceImpl implements RecipeService{
 
     //레시피 재료 등록
     @Override
-    public void registerIngredientRecipe(User user, UUID recipeId, UUID ingredientId) {
+    @Transactional
+    public void registerIngredientRecipe(User user, UUID recipeId, IngredientRecipeDto ingredientRecipeDto) {
         Recipe recipe = findRecipeByRecipeId(recipeId);
         checkAuth(recipe.getUser(), user);
 
+        //기존에 레시피에 존재하던 재료 리스트
         List<Ingredient> ingredients = findAllIngredientByIngredientRecipes(findAllIngredientRecipeByRecipe(recipe));
 
-        Ingredient newIngredient = findIngredientByIngredientId(ingredientId);
+        HashSet<Ingredient> existingIngredients = new HashSet<>(ingredients);
 
-        if(ingredients.stream().anyMatch(i->i.getId().equals(newIngredient.getId()))){
-            throw new ConflictException(ErrorCode.RECIPE_INGREDIENT_CONFLICT);
-        }
+        List<Ingredient> newIngredients = ingredientRecipeDto.nonDupIngredientIds().stream().map(i->
+                findIngredientByIngredientId(i)).collect(Collectors.toList());
 
-        registerRecipeIngredient(newIngredient, recipe);
+        //기존에 레시피에 존재하던 재료인지 확인 후 추가
+        newIngredients.stream().forEach(newIngredient->{
+            if(existingIngredients.contains(newIngredient)){
+                throw new ConflictException(ErrorCode.RECIPE_INGREDIENT_CONFLICT);
+            }
+            registerRecipeIngredient(newIngredient, recipe);
+        });
     }
 
     private Ingredient findIngredientByIngredientId(UUID ingredientId){
