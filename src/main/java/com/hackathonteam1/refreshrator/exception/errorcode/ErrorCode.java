@@ -15,6 +15,7 @@ public enum ErrorCode {
     LENGTH("4003", "길이가 유효하지 않습니다."),
     EMAIL("4004", "이메일 형식이 유효하지 않습니다."),
     NOT_NULL("4005", "필수값이 공백입니다."),
+    DUPLICATED_RECIPE_INGREDIENT("4006","레시피에 중복되는 재료 추가할 수 없습니다."),
 
     //AuthorizedException
     COOKIE_NOT_FOUND("4010", "쿠키를 찾을 수 없습니다."),
