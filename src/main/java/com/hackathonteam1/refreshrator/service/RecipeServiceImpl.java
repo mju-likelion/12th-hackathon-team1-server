@@ -52,10 +52,7 @@ public class RecipeServiceImpl implements RecipeService{
         Recipe recipe = findRecipeByRecipeId(recipeId);
         List<IngredientRecipe> ingredientRecipes = findAllIngredientRecipeByRecipe(recipe);
 
-        List<Ingredient> ingredients = findAllIngredientByIngredientRecipes(ingredientRecipes);
-
-        DetailRecipeDto detailRecipeDto = DetailRecipeDto.detailRecipeDto(recipe.getName(),ingredients, recipe.getCookingStep());
-
+        DetailRecipeDto detailRecipeDto = DetailRecipeDto.detailRecipeDto(recipe.getName(),ingredientRecipes, recipe.getCookingStep());
         return detailRecipeDto;
     }
 

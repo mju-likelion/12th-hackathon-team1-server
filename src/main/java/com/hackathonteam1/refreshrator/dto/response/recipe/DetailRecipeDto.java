@@ -1,7 +1,6 @@
 package com.hackathonteam1.refreshrator.dto.response.recipe;
 
-import com.hackathonteam1.refreshrator.dto.response.ingredient.IngredientDto;
-import com.hackathonteam1.refreshrator.entity.Ingredient;
+import com.hackathonteam1.refreshrator.entity.IngredientRecipe;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -14,12 +13,12 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class DetailRecipeDto {
     private String name;
-    private List<IngredientDto> ingredients;
+    private List<IngredientRecipeResponseDto> ingredientRecipes;
     private String cookingStep;
 
-    public static DetailRecipeDto detailRecipeDto(String name, List<Ingredient> ingredients, String cookingStep){
-        List<IngredientDto> ingredientDtos = ingredients.stream().map(
-                i->IngredientDto.changeToDto(i)).collect(Collectors.toList());
+    public static DetailRecipeDto detailRecipeDto(String name, List<IngredientRecipe> ingredientRecipes, String cookingStep){
+        List<IngredientRecipeResponseDto> ingredientDtos = ingredientRecipes.stream().map(
+                i->IngredientRecipeResponseDto.changeToDto(i)).collect(Collectors.toList());
         return new DetailRecipeDto(name, ingredientDtos, cookingStep);
     }
 }
