@@ -1,5 +1,6 @@
 package com.hackathonteam1.refreshrator.exception.errorcode;
 
+import com.hackathonteam1.refreshrator.entity.Recipe;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -14,6 +15,7 @@ public enum ErrorCode {
     LENGTH("4003", "길이가 유효하지 않습니다."),
     EMAIL("4004", "이메일 형식이 유효하지 않습니다."),
     NOT_NULL("4005", "필수값이 공백입니다."),
+    DUPLICATED_RECIPE_INGREDIENT("4006","레시피에 중복되는 재료 추가할 수 없습니다."),
 
     //AuthorizedException
     COOKIE_NOT_FOUND("4010", "쿠키를 찾을 수 없습니다."),
@@ -33,7 +35,8 @@ public enum ErrorCode {
     FRIDGE_ITEM_NOT_FOUND("4045","냉장고에 등록된 재료 정보를 찾을 수 없습니다."),
 
     //ConflictException
-    DUPLICATED_EMAIL("4090", "이미 사용 중인 이메일입니다.");
+    DUPLICATED_EMAIL("4090", "이미 사용 중인 이메일입니다."),
+    RECIPE_INGREDIENT_CONFLICT("4091", "이미 해당 레시피에 존재하는 재료입니다.");
 
 
     private final String code;

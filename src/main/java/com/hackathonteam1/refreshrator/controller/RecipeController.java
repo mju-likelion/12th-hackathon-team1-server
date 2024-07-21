@@ -2,7 +2,8 @@ package com.hackathonteam1.refreshrator.controller;
 
 import com.hackathonteam1.refreshrator.annotation.AuthenticatedUser;
 import com.hackathonteam1.refreshrator.dto.ResponseDto;
-import com.hackathonteam1.refreshrator.dto.request.recipe.ModifyRecipeDto;
+import com.hackathonteam1.refreshrator.dto.request.recipe.IngredientRecipeDto;
+import com.hackathonteam1.refreshrator.dto.request.recipe.RecipeDto;
 import com.hackathonteam1.refreshrator.dto.request.recipe.RegisterRecipeDto;
 import com.hackathonteam1.refreshrator.dto.response.recipe.DetailRecipeDto;
 import com.hackathonteam1.refreshrator.entity.User;
@@ -36,9 +37,16 @@ public class RecipeController {
 
     @PatchMapping("/{recipe_id}")
     public ResponseEntity<ResponseDto<Void>> modify(
-            @RequestBody @Valid ModifyRecipeDto modifyRecipeDto, @AuthenticatedUser User user, @PathVariable("recipe_id") UUID recipeId){
-        recipeService.modifyContent(modifyRecipeDto, user, recipeId);
+            @RequestBody @Valid RecipeDto recipeDto, @AuthenticatedUser User user, @PathVariable("recipe_id") UUID recipeId){
+        recipeService.modifyContent(recipeDto, user, recipeId);
         return new ResponseEntity<>(ResponseDto.res(HttpStatus.OK,"레시피 수정 성공"),HttpStatus.OK);
+    }
+
+    @PostMapping("/{recipe_id}/ingredients")
+    public ResponseEntity<ResponseDto<Void>> registerIngredientRecipe(@PathVariable("recipe_id") UUID recipeId,
+                                                                      @RequestBody @Valid IngredientRecipeDto ingredientRecipeDto, @AuthenticatedUser User user){
+        recipeService.registerIngredientRecipe(user, recipeId, ingredientRecipeDto);
+        return new ResponseEntity<>(ResponseDto.res(HttpStatus.CREATED, "레시피 재료 등록 성공"),HttpStatus.CREATED);
     }
 
 
