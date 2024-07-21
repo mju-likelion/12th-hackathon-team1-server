@@ -13,10 +13,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.Duration;
 
@@ -52,5 +49,17 @@ public class AuthController {
         response.addHeader("set-cookie", cookie.toString());
 
         return new ResponseEntity<>(ResponseDto.res(HttpStatus.OK, "로그인 완료"), HttpStatus.OK);
+    }
+
+    //로그아웃
+    @PostMapping("/logout")
+    public ResponseEntity<ResponseDto<Void>> logout(final HttpServletResponse response) {
+        ResponseCookie cookie = ResponseCookie.from("AccessToken", null)
+                .maxAge(0)
+                .path("/")
+                .build();
+        response.addHeader("set-cookie", cookie.toString());
+
+        return new ResponseEntity<>(ResponseDto.res(HttpStatus.OK, "로그아웃 완료"), HttpStatus.OK);
     }
 }
