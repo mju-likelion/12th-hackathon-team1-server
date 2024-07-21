@@ -27,10 +27,17 @@ public class FridgeController {
         return new ResponseEntity<>(ResponseDto.res(HttpStatus.CREATED, "냉장고에 재료 등록 성공"), HttpStatus.CREATED);
     }
 
-    //재료 정보 수정
+    //냉장고에 재료 정보 수정
     @PatchMapping("/ingredients/{ingredient_id}")
     public ResponseEntity<ResponseDto<Void>> updateIngredientInFridge(@PathVariable("ingredient_id") UUID id , @RequestBody @Valid AddFridgeDto addFridgeDto, @AuthenticatedUser User user) {
         fridgeService.updateIngredientInFridge(id,addFridgeDto, user);
         return new ResponseEntity<>(ResponseDto.res(HttpStatus.OK, "냉장고에 재료 수정 성공"), HttpStatus.OK);
+    }
+
+    //냉장고에 재료 삭제
+    @DeleteMapping("/ingredients/{ingredient_id}")
+    public ResponseEntity<ResponseDto<Void>> deleteIngredientInFridge(@PathVariable("ingredient_id") UUID id , @AuthenticatedUser User user) {
+        fridgeService.deleteIngredientInFridge(id, user);
+        return new ResponseEntity<>(ResponseDto.res(HttpStatus.OK, "냉장고에 재료 삭제 성공"), HttpStatus.OK);
     }
 }
