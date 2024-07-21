@@ -1,7 +1,5 @@
 package com.hackathonteam1.refreshrator.dto.request.fridge;
 
-import com.hackathonteam1.refreshrator.entity.FridgeItem;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

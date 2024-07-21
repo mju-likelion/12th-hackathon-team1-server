@@ -22,6 +22,7 @@ public enum ErrorCode {
 
     //ForbiddenException
     RECIPE_FORBIDDEN("4030","해당 레시피에 대한 권한이 없습니다."),
+    FRIDGE_ITEM_FORBIDDEN("4031","해당 재료정보에 대한 권한이 없습니다."),
 
     //NotFoundException
     USERID_NOT_FOUND("4040","존재하지 않는 사용자 입니다"),
@@ -29,6 +30,7 @@ public enum ErrorCode {
     RECIPE_NOT_FOUND("4042", "레시피를 찾을 수 없습니다."),
     INGREDIENT_RECIPE_NOT_FOUND("4043", "레시피의 재료를 찾을 수 없습니다."),
     FRIDGE_NOT_FOUND("4044","냉장고를 찾을 수 없습니다"),
+    FRIDGE_ITEM_NOT_FOUND("4045","냉장고에 등록된 재료 정보를 찾을 수 없습니다."),
 
     //ConflictException
     DUPLICATED_EMAIL("4090", "이미 사용 중인 이메일입니다.");
