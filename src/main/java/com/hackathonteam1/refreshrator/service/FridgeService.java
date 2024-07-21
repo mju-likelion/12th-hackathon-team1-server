@@ -36,7 +36,6 @@ public class FridgeService {
         FridgeItem fridgeItem=FridgeItem.builder()
                 .fridge(fridge)
                 .ingredient(ingredient)
-                .user(user)
                 .expiredDate(addFridgeDto.getExpiredDate())
                 .quantity(addFridgeDto.getQuantity())
                 .storage(defindStorage(addFridgeDto.getStorage()))
@@ -54,7 +53,7 @@ public class FridgeService {
                 .orElseThrow(()-> new NotFoundException(ErrorCode.FRIDGE_ITEM_NOT_FOUND));
 
         //유저가 등록한 재료인지 검사
-        checkAuth(user,fridgeItem.getUser());
+        checkAuth(fridgeItem.getFridge().getUser(),user);
 
         //수정하기
         fridgeItem.setExpiredDate(addFridgeDto.getExpiredDate());
