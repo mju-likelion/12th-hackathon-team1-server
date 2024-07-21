@@ -43,6 +43,12 @@ public class RecipeController {
         return new ResponseEntity<>(ResponseDto.res(HttpStatus.OK,"레시피 수정 성공"),HttpStatus.OK);
     }
 
+    @DeleteMapping("/{recipe_id}")
+    public ResponseEntity<ResponseDto<Void>> delete(@PathVariable("recipe_id") UUID recipeId, @AuthenticatedUser User user){
+        recipeService.delete(recipeId, user);
+        return new ResponseEntity<>(ResponseDto.res(HttpStatus.OK,"레시피 삭제 성공"),HttpStatus.OK);
+    }
+
     @PostMapping("/{recipe_id}/ingredients")
     public ResponseEntity<ResponseDto<Void>> registerIngredientRecipe(@PathVariable("recipe_id") UUID recipeId,
                                                                       @RequestBody @Valid RegisterIngredientRecipesDto registerIngredientRecipesDto, @AuthenticatedUser User user){

@@ -74,6 +74,14 @@ public class RecipeServiceImpl implements RecipeService{
         recipeRepository.save(recipe);
     }
 
+    //레시피 삭제
+    @Override
+    public void delete(UUID recipeId, User user) {
+        Recipe recipe = findRecipeByRecipeId(recipeId);
+        checkAuth(recipe.getUser(), user);
+        recipeRepository.delete(recipe);
+    }
+
     //레시피 재료 등록
     @Override
     @Transactional
