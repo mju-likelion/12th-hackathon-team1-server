@@ -13,7 +13,6 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@ToString(exclude = "recipe")
 public class Image extends BaseEntity{
 
     @Column(nullable = false)
