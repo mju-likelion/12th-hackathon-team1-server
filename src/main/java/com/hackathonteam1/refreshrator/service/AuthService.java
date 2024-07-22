@@ -52,6 +52,12 @@ public class AuthService {
         fridgeRepository.save(fridge);
     }
 
+    //회원탈퇴
+    public void leave(User user){
+        //탈퇴
+        userRepository.delete(user);
+    }
+
     //로그인
     public TokenResponseDto login(LoginDto loginDto){
 
