@@ -1,6 +1,8 @@
 package com.hackathonteam1.refreshrator.service;
 
 import com.hackathonteam1.refreshrator.dto.request.fridge.AddFridgeDto;
+import com.hackathonteam1.refreshrator.dto.response.ingredient.IngredientDto;
+import com.hackathonteam1.refreshrator.dto.response.ingredient.IngredientListDto;
 import com.hackathonteam1.refreshrator.entity.Fridge;
 import com.hackathonteam1.refreshrator.entity.FridgeItem;
 import com.hackathonteam1.refreshrator.entity.Ingredient;
@@ -14,6 +16,8 @@ import com.hackathonteam1.refreshrator.repository.IngredientRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -75,6 +79,26 @@ public class FridgeService {
 
         //삭제하기
         fridgeItemRepository.delete(fridgeItem);
+    }
+
+    // 냉장고에 모든 재료 조회
+    public IngredientListDto getIngredientsInFridge(User user) {
+        // 유저의 냉장고 찾기
+        Fridge fridge = findFridge(user);
+
+        // 권힌 확인
+        checkAuth(fridge.getUser(),user);
+
+        List<IngredientDto> ingredientDtoList = new ArrayList<>();
+
+        for(FridgeItem fridgeItem : fridge.getFridgeItem()){
+            IngredientDto ingredientDto = IngredientDto.builder()
+                    .id(fridgeItem.getIngredient().getId())
+                    .name(fridgeItem.getIngredient().getName())
+                    .build();
+            ingredientDtoList.add(ingredientDto);
+        }
+        return new IngredientListDto(ingredientDtoList);
     }
 
     //저장방법 결정 메서드

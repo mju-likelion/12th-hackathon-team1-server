@@ -3,6 +3,8 @@ package com.hackathonteam1.refreshrator.controller;
 import com.hackathonteam1.refreshrator.annotation.AuthenticatedUser;
 import com.hackathonteam1.refreshrator.dto.ResponseDto;
 import com.hackathonteam1.refreshrator.dto.request.fridge.AddFridgeDto;
+import com.hackathonteam1.refreshrator.dto.response.ingredient.IngredientDto;
+import com.hackathonteam1.refreshrator.dto.response.ingredient.IngredientListDto;
 import com.hackathonteam1.refreshrator.entity.User;
 import com.hackathonteam1.refreshrator.service.FridgeService;
 import jakarta.validation.Valid;
@@ -40,4 +42,12 @@ public class FridgeController {
         fridgeService.deleteIngredientInFridge(id, user);
         return new ResponseEntity<>(ResponseDto.res(HttpStatus.OK, "냉장고에 재료 삭제 성공"), HttpStatus.OK);
     }
+
+    // 냉장고에 있는 모든 재료 조회
+    @GetMapping("/ingredients")
+    public ResponseEntity<ResponseDto<IngredientListDto>> getIngredientsInFridge(@AuthenticatedUser User user) {
+        IngredientListDto ingredientListDto = fridgeService.getIngredientsInFridge(user);
+        return new ResponseEntity<>(ResponseDto.res(HttpStatus.OK, "냉장고에 있는 모든 재료 조회 성공", ingredientListDto), HttpStatus.OK);
+    }
+
 }
