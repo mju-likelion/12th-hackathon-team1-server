@@ -11,6 +11,6 @@ public class PaginationDto {
     private int totalPage;
 
     public static <T> PaginationDto paginationDto(Page<T> page){
-        return new PaginationDto(page.getNumber(), page.getTotalPages()-1);
+        return new PaginationDto(page.getNumber(), page.getTotalPages());
     }
 }
