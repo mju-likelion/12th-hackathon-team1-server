@@ -1,7 +1,6 @@
 package com.hackathonteam1.refreshrator.controller;
 
 import com.hackathonteam1.refreshrator.dto.ResponseDto;
-import com.hackathonteam1.refreshrator.dto.response.ingredient.IngredientDto;
 import com.hackathonteam1.refreshrator.dto.response.ingredient.IngredientListDto;
 import com.hackathonteam1.refreshrator.service.IngredientService;
 import lombok.AllArgsConstructor;
@@ -24,4 +23,9 @@ public class IngredientController {
     }
 
     // DB에 있는 재료 검색
+    @GetMapping("/search")
+    public ResponseEntity<ResponseDto<IngredientListDto>> searchIngredientByName(@RequestParam String name) {
+        IngredientListDto ingredientListDto = ingredientService.searchIngredientByName(name);
+        return new ResponseEntity<>(ResponseDto.res(HttpStatus.OK, "재료 검색 성공", ingredientListDto), HttpStatus.OK);
+    }
 }
