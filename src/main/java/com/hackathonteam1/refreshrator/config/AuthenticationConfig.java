@@ -21,8 +21,8 @@ public class AuthenticationConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(final InterceptorRegistry registry) {
         registry.addInterceptor(authenticationInterceptor)
-                .addPathPatterns("/fridge/**","/recipes/**")
-                .excludePathPatterns("/auth/signin", "/auth/login","/auth/logout");
+                .addPathPatterns("/fridge/**","/recipes/**","/auth/leave","/auth/logout")
+                .excludePathPatterns("/auth/signin", "/auth/login");
     }
 
     //컨트롤러 메서드 파라미터에 인증된 유저가 들어가도록 함
