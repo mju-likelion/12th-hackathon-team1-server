@@ -7,10 +7,7 @@ import com.hackathonteam1.refreshrator.dto.request.recipe.RegisterRecipeDto;
 import com.hackathonteam1.refreshrator.dto.response.file.ImageDto;
 import com.hackathonteam1.refreshrator.dto.response.recipe.DetailRecipeDto;
 import com.hackathonteam1.refreshrator.entity.*;
-import com.hackathonteam1.refreshrator.exception.ConflictException;
-import com.hackathonteam1.refreshrator.exception.FileStorageException;
-import com.hackathonteam1.refreshrator.exception.ForbiddenException;
-import com.hackathonteam1.refreshrator.exception.NotFoundException;
+import com.hackathonteam1.refreshrator.exception.*;
 import com.hackathonteam1.refreshrator.exception.errorcode.ErrorCode;
 import com.hackathonteam1.refreshrator.repository.ImageRepository;
 import com.hackathonteam1.refreshrator.repository.IngredientRecipeRepository;
@@ -18,6 +15,7 @@ import com.hackathonteam1.refreshrator.repository.IngredientRepository;
 import com.hackathonteam1.refreshrator.repository.RecipeRepository;
 import com.hackathonteam1.refreshrator.util.S3Uploader;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -154,6 +152,25 @@ public class RecipeServiceImpl implements RecipeService{
         imageRepository.save(image);
         ImageDto imageDto = ImageDto.mapping(image);
         return imageDto;
+    }
+
+    @Override
+    public void deleteImage(UUID imageId, User user) {
+        Image image = findImageByImageId(imageId);
+        Recipe recipe = image.getRecipe();
+
+        if(!recipe.isContainingImage()){
+            throw new BadRequestException(ErrorCode.IMAGE_NOT_IN_RECIPE);
+        }
+
+        checkAuth(recipe.getUser(), user);
+        recipe.deleteImage();
+        s3Uploader.removeS3File(image.getUrl().split("/")[3]);
+        imageRepository.delete(image);
+    }
+
+    private Image findImageByImageId(UUID imageId){
+        return imageRepository.findById(imageId).orElseThrow(()->new NotFoundException(ErrorCode.IMAGE_NOT_FOUND));
     }
 
     private Ingredient findIngredientByIngredientId(UUID ingredientId){

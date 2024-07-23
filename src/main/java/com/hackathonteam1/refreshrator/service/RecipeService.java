@@ -34,4 +34,7 @@ public interface RecipeService {
     //파일(이미지) 등록
     public ImageDto registerImage(MultipartFile file);
 
+    //파일(이미지) 삭제
+    public void deleteImage(UUID imageId, User user);
+
 }
