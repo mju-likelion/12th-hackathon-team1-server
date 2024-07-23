@@ -1,8 +1,8 @@
 package com.hackathonteam1.refreshrator.service;
 
 import com.hackathonteam1.refreshrator.dto.request.fridge.AddFridgeDto;
-import com.hackathonteam1.refreshrator.dto.response.ingredient.IngredientDto;
-import com.hackathonteam1.refreshrator.dto.response.ingredient.IngredientListDto;
+import com.hackathonteam1.refreshrator.dto.response.fridge.FridgeItemDto;
+import com.hackathonteam1.refreshrator.dto.response.fridge.FridgeItemListDto;
 import com.hackathonteam1.refreshrator.entity.Fridge;
 import com.hackathonteam1.refreshrator.entity.FridgeItem;
 import com.hackathonteam1.refreshrator.entity.Ingredient;
@@ -16,6 +16,7 @@ import com.hackathonteam1.refreshrator.repository.IngredientRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -82,23 +83,41 @@ public class FridgeService {
     }
 
     // 냉장고에 모든 재료 조회
-    public IngredientListDto getIngredientsInFridge(User user) {
+    public FridgeItemListDto getIngredientsInFridge(User user) {
         // 유저의 냉장고 찾기
         Fridge fridge = findFridge(user);
 
         // 권힌 확인
         checkAuth(fridge.getUser(),user);
 
-        List<IngredientDto> ingredientDtoList = new ArrayList<>();
+        List<FridgeItemDto> coldStorageList = new ArrayList<>(); // 냉장 재료 리스트
+        List<FridgeItemDto> frozenStorageList = new ArrayList<>(); // 냉동 재료 리스트
+        List<FridgeItemDto> ambientStorageList = new ArrayList<>(); // 실온 재료 리스트
+        List<FridgeItemDto> expirationDateList = new ArrayList<>(); // 유통 기한 만료 재료 리스트
 
         for(FridgeItem fridgeItem : fridge.getFridgeItem()){
-            IngredientDto ingredientDto = IngredientDto.builder()
-                    .id(fridgeItem.getIngredient().getId())
-                    .name(fridgeItem.getIngredient().getName())
+            FridgeItemDto fridgeItemDto = FridgeItemDto.builder()
+                    .id(fridgeItem.getId())
+                    .ingredientId(fridgeItem.getIngredient().getId())
+                    .ingredientName(fridgeItem.getIngredient().getName())
                     .build();
-            ingredientDtoList.add(ingredientDto);
+
+            if(LocalDate.now().isAfter(fridgeItem.getExpiredDate())){
+                // 유통 기한 만료 재료
+                expirationDateList.add(fridgeItemDto);
+            } else if(fridgeItem.getStorage().equals(FridgeItem.Storage.STORE_AT_ROOM_TEMPERATURE)){
+                // 실온 보관인 경우
+                ambientStorageList.add(fridgeItemDto);
+            } else if(fridgeItem.getStorage().equals(FridgeItem.Storage.REFRIGERATED)){
+                // 냉장 보관인 경우
+                coldStorageList.add(fridgeItemDto);
+            } else if(fridgeItem.getStorage().equals(FridgeItem.Storage.FROZEN)){
+                // 냉동 보관인 경우
+                frozenStorageList.add(fridgeItemDto);
+            }
+
         }
-        return new IngredientListDto(ingredientDtoList);
+        return new FridgeItemListDto(coldStorageList, frozenStorageList, ambientStorageList, expirationDateList);
     }
 
     //저장방법 결정 메서드
