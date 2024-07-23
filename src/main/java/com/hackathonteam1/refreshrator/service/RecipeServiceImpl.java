@@ -4,23 +4,27 @@ import com.hackathonteam1.refreshrator.dto.request.recipe.DeleteIngredientRecipe
 import com.hackathonteam1.refreshrator.dto.request.recipe.RegisterIngredientRecipesDto;
 import com.hackathonteam1.refreshrator.dto.request.recipe.ModifyRecipeDto;
 import com.hackathonteam1.refreshrator.dto.request.recipe.RegisterRecipeDto;
+import com.hackathonteam1.refreshrator.dto.response.file.ImageDto;
 import com.hackathonteam1.refreshrator.dto.response.recipe.DetailRecipeDto;
-import com.hackathonteam1.refreshrator.entity.Ingredient;
-import com.hackathonteam1.refreshrator.entity.IngredientRecipe;
-import com.hackathonteam1.refreshrator.entity.Recipe;
-import com.hackathonteam1.refreshrator.entity.User;
+import com.hackathonteam1.refreshrator.entity.*;
 import com.hackathonteam1.refreshrator.exception.ConflictException;
+import com.hackathonteam1.refreshrator.exception.FileStorageException;
 import com.hackathonteam1.refreshrator.exception.ForbiddenException;
 import com.hackathonteam1.refreshrator.exception.NotFoundException;
 import com.hackathonteam1.refreshrator.exception.errorcode.ErrorCode;
+import com.hackathonteam1.refreshrator.repository.ImageRepository;
 import com.hackathonteam1.refreshrator.repository.IngredientRecipeRepository;
 import com.hackathonteam1.refreshrator.repository.IngredientRepository;
 import com.hackathonteam1.refreshrator.repository.RecipeRepository;
+import com.hackathonteam1.refreshrator.util.S3Uploader;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -33,6 +37,8 @@ public class RecipeServiceImpl implements RecipeService{
     private final RecipeRepository recipeRepository;
     private final IngredientRepository ingredientRepository;
     private final IngredientRecipeRepository ingredientRecipeRepository;
+    private final S3Uploader s3Uploader;
+    private final ImageRepository imageRepository;
 
     @Override
     @Transactional
@@ -123,6 +129,31 @@ public class RecipeServiceImpl implements RecipeService{
             ingredientRecipeRepository.deleteById(i);
         });
 
+    }
+
+    @Override
+    public ImageDto registerImage(MultipartFile file) {
+
+        if(!file.getContentType().equals(MediaType.IMAGE_GIF_VALUE) &&
+                !file.getContentType().equals(MediaType.IMAGE_PNG_VALUE) &&
+                !file.getContentType().equals(MediaType.IMAGE_JPEG_VALUE) ){
+            throw new FileStorageException(ErrorCode.FILE_TYPE_ERROR);
+        }
+
+        String url;
+        try {
+           url = s3Uploader.upload(file);
+        } catch (IOException e) {
+            throw new FileStorageException(ErrorCode.FILE_STORAGE_ERROR, e.getMessage());
+        }
+
+        Image image = Image.builder()
+                .url(url)
+                .build();
+
+        imageRepository.save(image);
+        ImageDto imageDto = ImageDto.mapping(image);
+        return imageDto;
     }
 
     private Ingredient findIngredientByIngredientId(UUID ingredientId){
