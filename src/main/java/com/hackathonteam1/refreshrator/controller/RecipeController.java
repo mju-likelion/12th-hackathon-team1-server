@@ -73,4 +73,11 @@ public class RecipeController {
         return new ResponseEntity<>(ResponseDto.res(HttpStatus.OK, "이미지 등록 성공", imageDto),HttpStatus.OK);
     }
 
+    @DeleteMapping(value = "/images/{image_Id}")
+    public ResponseEntity<ResponseDto<Void>> deleteFile(
+            @PathVariable UUID image_Id,@AuthenticatedUser User user){
+        recipeService.deleteImage(image_Id, user);
+        return new ResponseEntity<>(ResponseDto.res(HttpStatus.OK, "이미지 삭제 성공"),HttpStatus.OK);
+    }
+
 }
