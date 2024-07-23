@@ -30,4 +30,8 @@ public interface RecipeService {
     //레시피 재료 삭제
     public void deleteIngredientRecipe(User user, UUID recipeId, DeleteIngredientRecipesDto deleteIngredientRecipesDto);
 
+    // 레시피에 좋아요 추가
+    public void addLikeToRecipe(User user, UUID recipeId);
+
+    // 레시피에 좋아요 삭제
 }

@@ -5,10 +5,7 @@ import com.hackathonteam1.refreshrator.dto.request.recipe.RegisterIngredientReci
 import com.hackathonteam1.refreshrator.dto.request.recipe.ModifyRecipeDto;
 import com.hackathonteam1.refreshrator.dto.request.recipe.RegisterRecipeDto;
 import com.hackathonteam1.refreshrator.dto.response.recipe.DetailRecipeDto;
-import com.hackathonteam1.refreshrator.entity.Ingredient;
-import com.hackathonteam1.refreshrator.entity.IngredientRecipe;
-import com.hackathonteam1.refreshrator.entity.Recipe;
-import com.hackathonteam1.refreshrator.entity.User;
+import com.hackathonteam1.refreshrator.entity.*;
 import com.hackathonteam1.refreshrator.exception.ConflictException;
 import com.hackathonteam1.refreshrator.exception.ForbiddenException;
 import com.hackathonteam1.refreshrator.exception.NotFoundException;
@@ -136,6 +133,28 @@ public class RecipeServiceImpl implements RecipeService{
                 .ingredient(ingredient)
                 .build();
         ingredientRecipeRepository.save(ingredientRecipe);
+    }
+
+    // 레시피에 좋아요 추가
+    @Override
+    public void addLikeToRecipe(User user, UUID recipeId){
+        // 유저가 이미 좋아요를 누른 레시피인지 확인
+        this.isUserAlreadyAddLike(user, recipeId);
+        // 좋아요를 누른 레시피가 아니라면 좋아요 추가
+        Recipe recipe = findRecipeByRecipeId(recipeId);
+        RecipeLike recipeLike = new RecipeLike(user, recipe);
+        recipe.getRecipeLikes().add(recipeLike);
+        this.recipeRepository.save(recipe);
+    }
+
+    // 유저가 이미 좋아요를 누른 레시피인지 확인
+    public void isUserAlreadyAddLike(User user, UUID recipeId){
+        List<RecipeLike> recipeLikes = user.getRecipeLikes();
+        for(RecipeLike recipeLike : recipeLikes){
+            if(recipeLike.getRecipe().getId().equals(recipeId)){
+                throw new ConflictException(ErrorCode.USER_ALREADY_ADD_LIKE);
+            }
+        }
     }
 
     private Recipe findRecipeByRecipeId(UUID recipeId){

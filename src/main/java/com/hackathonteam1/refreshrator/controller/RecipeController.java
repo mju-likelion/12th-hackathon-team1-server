@@ -63,5 +63,11 @@ public class RecipeController {
         return new ResponseEntity<>(ResponseDto.res(HttpStatus.OK, "레시피 재료 삭제 성공"),HttpStatus.OK);
     }
 
+    // 레시피에 좋아요 추가
+    @PostMapping("/{recipe_id}/like")
+    public ResponseEntity<ResponseDto<Void>> addLikeToRecipe(@PathVariable("recipe_id") UUID recipeId, @AuthenticatedUser User user){
+        recipeService.addLikeToRecipe(user, recipeId);
+        return new ResponseEntity<>(ResponseDto.res(HttpStatus.CREATED, "레시피에 좋아요 추가 성공"),HttpStatus.CREATED);
+    }
 
 }
