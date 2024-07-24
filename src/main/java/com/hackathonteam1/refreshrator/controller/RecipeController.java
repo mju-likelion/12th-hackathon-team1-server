@@ -16,7 +16,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -87,10 +86,17 @@ public class RecipeController {
     }
 
     // 레시피에 좋아요 추가
-    @PostMapping("/{recipe_id}/like")
+    @PostMapping("/{recipe_id}/likes")
     public ResponseEntity<ResponseDto<Void>> addLikeToRecipe(@PathVariable("recipe_id") UUID recipeId, @AuthenticatedUser User user){
         recipeService.addLikeToRecipe(user, recipeId);
         return new ResponseEntity<>(ResponseDto.res(HttpStatus.CREATED, "레시피에 좋아요 추가 성공"),HttpStatus.CREATED);
+    }
+
+    // 레시피에 좋아요 삭제
+    @DeleteMapping("{recipe_id}/likes")
+    public ResponseEntity<ResponseDto<Void>> deleteLikeFromRecipe(@PathVariable("recipe_id") UUID recipeId, @AuthenticatedUser User user){
+        recipeService.deleteLikeFromRecipe(user, recipeId);
+        return new ResponseEntity<>(ResponseDto.res(HttpStatus.OK, "레시피에 좋아요 삭제 성공"),HttpStatus.OK);
     }
     
     @PostMapping(value = "/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE )
