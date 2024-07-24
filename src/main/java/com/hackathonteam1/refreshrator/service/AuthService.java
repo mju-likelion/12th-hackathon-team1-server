@@ -91,10 +91,9 @@ public class AuthService {
 
     // 좋아요 누른 레시피 목록 조회
     public RecipeListReponseDto showAllRecipeLikes(User user) {
-//        List<RecipeLike> recipeLikes = this.findMyLikeList(user);
         List<RecipeResponseDto> recipeListReponseDtos = new ArrayList<>();
 
-        List<RecipeLike> recipeLikes = this.findMyLikeList(user);
+        List<RecipeLike> recipeLikes = this.recipeLikeRepository.findAllByUser(user);
 
         for(RecipeLike recipeLike : recipeLikes){
             RecipeResponseDto recipeResponseDto = RecipeResponseDto.builder()
@@ -104,17 +103,5 @@ public class AuthService {
             recipeListReponseDtos.add(recipeResponseDto);
         }
         return new RecipeListReponseDto(recipeListReponseDtos);
-    }
-
-    public List<RecipeLike> findMyLikeList(User user) {
-        List<RecipeLike> recipeLikes = this.recipeLikeRepository.findAll();
-        List<RecipeLike> result = new ArrayList<>();
-        for(RecipeLike recipeLike : recipeLikes){
-            if(user.getId().equals(recipeLike.getUser().getId())){
-                result.add(recipeLike);
-            }
-        }
-        return result;
-
     }
 }
