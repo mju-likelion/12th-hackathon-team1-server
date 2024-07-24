@@ -3,6 +3,7 @@ package com.hackathonteam1.refreshrator.service;
 import com.hackathonteam1.refreshrator.dto.request.fridge.AddFridgeDto;
 import com.hackathonteam1.refreshrator.dto.response.fridge.FridgeItemDto;
 import com.hackathonteam1.refreshrator.dto.response.fridge.FridgeItemListDto;
+import com.hackathonteam1.refreshrator.dto.response.fridgeItem.FridgeItemResponseData;
 import com.hackathonteam1.refreshrator.entity.Fridge;
 import com.hackathonteam1.refreshrator.entity.FridgeItem;
 import com.hackathonteam1.refreshrator.entity.Ingredient;
@@ -121,7 +122,7 @@ public class FridgeService {
     }
 
     //냉장고에 있는 재료 단건 조회 메서드
-    public FridgeItemResponseData detailIngredientInFridge(UUID fridgeItemId,User user){
+    public FridgeItemResponseData detailIngredientInFridge(UUID fridgeItemId, User user){
         //조회할 재료 찾기
         FridgeItem fridgeItem=findFridgeItem(fridgeItemId);
 
