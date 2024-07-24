@@ -37,6 +37,7 @@ public enum ErrorCode {
     FRIDGE_ITEM_NOT_FOUND("4045","냉장고에 등록된 재료 정보를 찾을 수 없습니다."),
     PAGE_NOT_FOUND("4046", "페이지를 찾을 수 없습니다"),
     IMAGE_NOT_FOUND("4047","이미지를 찾을 수 없습니다"),
+    RECIPE_LIKE_NOT_FOUND("4048", "좋아요를 누른 레시피가 아닙니다."),
 
 
     //ConflictException

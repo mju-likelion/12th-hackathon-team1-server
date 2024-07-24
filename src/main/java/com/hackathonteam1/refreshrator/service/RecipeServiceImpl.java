@@ -17,10 +17,7 @@ import com.hackathonteam1.refreshrator.entity.User;
 import com.hackathonteam1.refreshrator.exception.*;
 
 import com.hackathonteam1.refreshrator.exception.errorcode.ErrorCode;
-import com.hackathonteam1.refreshrator.repository.ImageRepository;
-import com.hackathonteam1.refreshrator.repository.IngredientRecipeRepository;
-import com.hackathonteam1.refreshrator.repository.IngredientRepository;
-import com.hackathonteam1.refreshrator.repository.RecipeRepository;
+import com.hackathonteam1.refreshrator.repository.*;
 import com.hackathonteam1.refreshrator.util.S3Uploader;
 import lombok.RequiredArgsConstructor;
 
@@ -52,6 +49,7 @@ public class RecipeServiceImpl implements RecipeService{
     private final IngredientRecipeRepository ingredientRecipeRepository;
     private final S3Uploader s3Uploader;
     private final ImageRepository imageRepository;
+    private final RecipeLikeRepository recipeLikeRepository;
 
     @Override
     public RecipeListDto getList(String keyword, String type, int page, int size) {
@@ -238,6 +236,16 @@ public class RecipeServiceImpl implements RecipeService{
         this.recipeRepository.save(recipe);
     }
 
+    // 레시피에 좋아요 삭제
+    @Override
+    public void deleteLikeFromRecipe(User user, UUID recipeId){
+        Recipe recipe = findRecipeByRecipeId(recipeId);
+        // 해당 레시피에서 내가 누른 좋아요 반환
+        RecipeLike recipeLike = this.findMyRecipeLike(user, recipe);
+        recipe.getUser().getRecipeLikes().remove(recipeLike);
+        this.recipeLikeRepository.delete(recipeLike);
+    }
+
     // 유저가 이미 좋아요를 누른 레시피인지 확인
     public void isUserAlreadyAddLike(User user, Recipe recipe){
         for (RecipeLike recipeLike : recipe.getRecipeLikes()) {
@@ -245,6 +253,16 @@ public class RecipeServiceImpl implements RecipeService{
                 throw new ConflictException(ErrorCode.USER_ALREADY_ADD_LIKE);
             }
         }
+    }
+
+    // 해당 레시피에서 내가 누른 좋아요 반환
+    public RecipeLike findMyRecipeLike(User user, Recipe recipe){
+        for (RecipeLike recipeLike : recipe.getRecipeLikes()) {
+            if(recipeLike.getUser().getId().equals(user.getId())){
+                return recipeLike;
+            }
+        }
+        throw new NotFoundException(ErrorCode.RECIPE_LIKE_NOT_FOUND);
     }
 
     private Recipe findRecipeByRecipeId(UUID recipeId){

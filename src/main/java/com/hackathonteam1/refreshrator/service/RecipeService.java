@@ -41,6 +41,7 @@ public interface RecipeService {
     public void addLikeToRecipe(User user, UUID recipeId);
 
     // 레시피에 좋아요 삭제
+    public void deleteLikeFromRecipe(User user, UUID recipeId);
   
     //파일(이미지) 등록
     public ImageDto registerImage(MultipartFile file);
