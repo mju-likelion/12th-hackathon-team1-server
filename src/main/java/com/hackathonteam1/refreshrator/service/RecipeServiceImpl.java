@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class RecipeServiceImpl implements RecipeService{
     private final RecipeRepository recipeRepository;
     private final IngredientRepository ingredientRepository;
@@ -138,20 +139,21 @@ public class RecipeServiceImpl implements RecipeService{
     // 레시피에 좋아요 추가
     @Override
     public void addLikeToRecipe(User user, UUID recipeId){
-        // 유저가 이미 좋아요를 누른 레시피인지 확인
-        this.isUserAlreadyAddLike(user, recipeId);
-        // 좋아요를 누른 레시피가 아니라면 좋아요 추가
         Recipe recipe = findRecipeByRecipeId(recipeId);
+
+        // 유저가 이미 좋아요를 누른 레시피인지 확인
+        this.isUserAlreadyAddLike(user, recipe);
+
+        // 좋아요를 누른 레시피가 아니라면 좋아요 추가
         RecipeLike recipeLike = new RecipeLike(user, recipe);
         recipe.getRecipeLikes().add(recipeLike);
         this.recipeRepository.save(recipe);
     }
 
     // 유저가 이미 좋아요를 누른 레시피인지 확인
-    public void isUserAlreadyAddLike(User user, UUID recipeId){
-        List<RecipeLike> recipeLikes = user.getRecipeLikes();
-        for(RecipeLike recipeLike : recipeLikes){
-            if(recipeLike.getRecipe().getId().equals(recipeId)){
+    public void isUserAlreadyAddLike(User user, Recipe recipe){
+        for (RecipeLike recipeLike : recipe.getRecipeLikes()) {
+            if(recipeLike.getUser().getId().equals(user.getId())){
                 throw new ConflictException(ErrorCode.USER_ALREADY_ADD_LIKE);
             }
         }
