@@ -1,6 +1,7 @@
 package com.hackathonteam1.refreshrator.service;
 
 import com.hackathonteam1.refreshrator.dto.request.fridge.AddFridgeDto;
+import com.hackathonteam1.refreshrator.dto.response.fridgeItem.FridgeItemResponseData;
 import com.hackathonteam1.refreshrator.entity.Fridge;
 import com.hackathonteam1.refreshrator.entity.FridgeItem;
 import com.hackathonteam1.refreshrator.entity.Ingredient;
@@ -47,10 +48,10 @@ public class FridgeService {
     }
 
     //냉장고에 재료 정보 수정 메서드
-    public void updateIngredientInFridge(UUID id, AddFridgeDto addFridgeDto, User user){
+    public void updateIngredientInFridge(UUID fridgeItemId, AddFridgeDto addFridgeDto, User user){
 
         //수정할 재료 찾기
-        FridgeItem fridgeItem=findFridgeItem(id);
+        FridgeItem fridgeItem=findFridgeItem(fridgeItemId);
 
         //유저가 등록한 재료인지 검사
         checkAuth(fridgeItem.getFridge().getUser(),user);
@@ -66,9 +67,9 @@ public class FridgeService {
     }
 
     //냉장고에 재료 삭제 메서드
-    public void deleteIngredientInFridge(UUID id, User user){
+    public void deleteIngredientInFridge(UUID fridgeItemId, User user){
         //삭제할 재료 찾기
-        FridgeItem fridgeItem=findFridgeItem(id);
+        FridgeItem fridgeItem=findFridgeItem(fridgeItemId);
 
         //권한 확인
         checkAuth(fridgeItem.getFridge().getUser(),user);
@@ -76,6 +77,19 @@ public class FridgeService {
         //삭제하기
         fridgeItemRepository.delete(fridgeItem);
     }
+
+    //냉장고에 있는 재료 단건 조회 메서드
+    public FridgeItemResponseData detailIngredientInFridge(UUID fridgeItemId,User user){
+        //조회할 재료 찾기
+        FridgeItem fridgeItem=findFridgeItem(fridgeItemId);
+
+        //권한 확인
+        checkAuth(fridgeItem.getFridge().getUser(),user);
+
+        //조회 하기
+        return FridgeItemResponseData.fromFridgeItem(fridgeItem);
+    }
+
 
     //저장방법 결정 메서드
     private FridgeItem.Storage defindStorage(String storage){
