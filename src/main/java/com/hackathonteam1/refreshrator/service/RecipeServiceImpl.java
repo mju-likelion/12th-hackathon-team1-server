@@ -5,6 +5,7 @@ import com.hackathonteam1.refreshrator.dto.request.recipe.RegisterIngredientReci
 import com.hackathonteam1.refreshrator.dto.request.recipe.ModifyRecipeDto;
 import com.hackathonteam1.refreshrator.dto.request.recipe.RegisterRecipeDto;
 import com.hackathonteam1.refreshrator.dto.response.recipe.DetailRecipeDto;
+import com.hackathonteam1.refreshrator.dto.response.recipe.RecipeListDto;
 import com.hackathonteam1.refreshrator.entity.Ingredient;
 import com.hackathonteam1.refreshrator.entity.IngredientRecipe;
 import com.hackathonteam1.refreshrator.entity.Recipe;
@@ -17,6 +18,10 @@ import com.hackathonteam1.refreshrator.repository.IngredientRecipeRepository;
 import com.hackathonteam1.refreshrator.repository.IngredientRepository;
 import com.hackathonteam1.refreshrator.repository.RecipeRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,6 +38,29 @@ public class RecipeServiceImpl implements RecipeService{
     private final RecipeRepository recipeRepository;
     private final IngredientRepository ingredientRepository;
     private final IngredientRecipeRepository ingredientRecipeRepository;
+
+    @Override
+    public RecipeListDto getList(String keyword, String type, int page, int size) {
+
+        Sort sort;
+        if (type.equals("newest")){
+            sort = Sort.by(Sort.Order.desc("createdAt"));
+        }else{
+            sort = Sort.by(Sort.Order.desc("likeCount"));
+        }
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        if(keyword.equals("")){
+            Page<Recipe> recipePage = recipeRepository.findAll(pageable);
+            checkValidPage(recipePage, page);
+            return RecipeListDto.mapping(recipePage);
+        }
+
+        Page<Recipe> recipePage = recipeRepository.findAllByNameContaining(keyword, pageable);
+        checkValidPage(recipePage, page);
+        return RecipeListDto.mapping(recipePage);
+    }
 
     @Override
     @Transactional
@@ -156,6 +184,12 @@ public class RecipeServiceImpl implements RecipeService{
     private void checkAuth(User writer, User user){
         if(!writer.getId().equals(user.getId())){
             throw new ForbiddenException(ErrorCode.RECIPE_FORBIDDEN);
+        }
+    }
+
+    private <T> void checkValidPage(Page<T> pages, int page){
+        if(pages.getTotalPages() <= page && page != 0){
+            throw new NotFoundException(ErrorCode.PAGE_NOT_FOUND);
         }
     }
 }
