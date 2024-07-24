@@ -15,7 +15,6 @@ import com.hackathonteam1.refreshrator.entity.IngredientRecipe;
 import com.hackathonteam1.refreshrator.entity.Recipe;
 import com.hackathonteam1.refreshrator.entity.User;
 import com.hackathonteam1.refreshrator.entity.Fridge;
-import com.hackathonteam1.refreshrator.entity.FrdigeItem;
 import com.hackathonteam1.refreshrator.entity.Image;
 
 import com.hackathonteam1.refreshrator.exception.*;
