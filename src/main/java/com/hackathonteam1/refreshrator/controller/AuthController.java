@@ -7,12 +7,15 @@ import com.hackathonteam1.refreshrator.dto.ResponseDto;
 import com.hackathonteam1.refreshrator.dto.request.auth.LoginDto;
 import com.hackathonteam1.refreshrator.dto.request.auth.SigninDto;
 import com.hackathonteam1.refreshrator.dto.response.auth.TokenResponseDto;
-import com.hackathonteam1.refreshrator.dto.response.recipe.RecipeListReponseDto;
+import com.hackathonteam1.refreshrator.dto.response.recipe.RecipeResponseDto;
 import com.hackathonteam1.refreshrator.entity.User;
 import com.hackathonteam1.refreshrator.service.AuthService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
@@ -86,8 +89,11 @@ public class AuthController {
 
     // 좋아요 누른 레시피 목록 조회
     @GetMapping("/likes")
-    public ResponseEntity<ResponseDto<RecipeListReponseDto>> showAllRecipeLikes(@AuthenticatedUser User user) {
-        RecipeListReponseDto recipeListReponseDto = authService.showAllRecipeLikes(user);
-        return new ResponseEntity<>(ResponseDto.res(HttpStatus.OK, "좋아요 누른 레시피 목록 조회 성공", recipeListReponseDto), HttpStatus.OK);
+    public ResponseEntity<ResponseDto<Page<RecipeResponseDto>>> showAllRecipeLikes(@AuthenticatedUser User user,
+                                                                                   @RequestParam(defaultValue = "0") int page,
+                                                                                   @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<RecipeResponseDto> recipeReponseDto = authService.showAllRecipeLikes(user, pageable);
+        return new ResponseEntity<>(ResponseDto.res(HttpStatus.OK, "좋아요 누른 레시피 목록 조회 성공", recipeReponseDto), HttpStatus.OK);
     }
 }

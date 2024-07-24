@@ -18,8 +18,8 @@ import com.hackathonteam1.refreshrator.repository.FridgeRepository;
 import com.hackathonteam1.refreshrator.repository.RecipeLikeRepository;
 import com.hackathonteam1.refreshrator.repository.UserRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -90,18 +90,23 @@ public class AuthService {
     }
 
     // 좋아요 누른 레시피 목록 조회
-    public RecipeListReponseDto showAllRecipeLikes(User user) {
-        List<RecipeResponseDto> recipeListReponseDtos = new ArrayList<>();
+    public Page<RecipeResponseDto> showAllRecipeLikes(User user, Pageable pageable) {
 
-        List<RecipeLike> recipeLikes = this.recipeLikeRepository.findAllByUser(user);
+        //정렬
+//        pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("createdAt").descending());
+
+        List<RecipeResponseDto> recipeListReponseDtos = new ArrayList<>();
+        Page<RecipeLike> recipeLikes = this.recipeLikeRepository.findAllByUser(user, pageable);
 
         for(RecipeLike recipeLike : recipeLikes){
             RecipeResponseDto recipeResponseDto = RecipeResponseDto.builder()
                     .recipeId(recipeLike.getRecipe().getId())
                     .name(recipeLike.getRecipe().getName())
+                    .likeCount(recipeLike.getRecipe().getLikeCount())
                     .build();
             recipeListReponseDtos.add(recipeResponseDto);
         }
-        return new RecipeListReponseDto(recipeListReponseDtos);
+
+        return new PageImpl<>(recipeListReponseDtos, pageable, recipeLikes.getTotalElements());
     }
 }

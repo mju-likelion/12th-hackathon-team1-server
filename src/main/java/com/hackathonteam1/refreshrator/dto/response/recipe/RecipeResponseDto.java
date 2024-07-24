@@ -12,4 +12,5 @@ import java.util.UUID;
 public class RecipeResponseDto {
     private UUID recipeId; // 레시피 Id
     private String name; // 레시피 이름
+    private int likeCount; // 좋아요 갯수
 }
