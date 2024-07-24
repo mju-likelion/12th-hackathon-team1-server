@@ -15,7 +15,6 @@ import com.hackathonteam1.refreshrator.entity.IngredientRecipe;
 import com.hackathonteam1.refreshrator.entity.Recipe;
 import com.hackathonteam1.refreshrator.entity.User;
 import com.hackathonteam1.refreshrator.entity.Fridge;
-import com.hackathonteam1.refreshrator.entity.FrdigeItem;
 import com.hackathonteam1.refreshrator.entity.Image;
 
 import com.hackathonteam1.refreshrator.exception.*;
@@ -86,14 +85,21 @@ public class RecipeServiceImpl implements RecipeService{
     @Override
     @Transactional
     public void register(RegisterRecipeDto registerRecipeDto, User user) {
+        Image image = null;
+
+        if(registerRecipeDto.getImageId()!=null){
+            image = findImageByImageId(registerRecipeDto.getImageId());
+        }
 
         Recipe recipe = Recipe.builder()
                 .name(registerRecipeDto.getName())
                 .cookingStep(registerRecipeDto.getCookingStep())
                 .user(user)
+                .image(image)
                 .build();
 
         recipeRepository.save(recipe);
+
         registerRecipeDto.getIngredientIds().stream().forEach(i -> registerRecipeIngredient(findIngredientByIngredientId(i),recipe));
     }
 
@@ -103,7 +109,7 @@ public class RecipeServiceImpl implements RecipeService{
         Recipe recipe = findRecipeByRecipeId(recipeId);
         List<IngredientRecipe> ingredientRecipes = findAllIngredientRecipeByRecipe(recipe);
 
-        DetailRecipeDto detailRecipeDto = DetailRecipeDto.detailRecipeDto(recipe.getName(),ingredientRecipes, recipe.getCookingStep());
+        DetailRecipeDto detailRecipeDto = DetailRecipeDto.mapping(recipe, ingredientRecipes);
         return detailRecipeDto;
     }
 
@@ -113,6 +119,11 @@ public class RecipeServiceImpl implements RecipeService{
         Recipe recipe = findRecipeByRecipeId(recipeId);
         checkAuth(recipe.getUser(), user);
 
+        Image image = null;
+
+        if(modifyRecipeDto.getImageId()!=null){
+            recipe.updateImage(findImageByImageId(modifyRecipeDto.getImageId()));
+        }
         if(modifyRecipeDto.getName()!=null){
             recipe.updateName(modifyRecipeDto.getName());
         }
