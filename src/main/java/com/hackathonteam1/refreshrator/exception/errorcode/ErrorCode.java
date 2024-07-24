@@ -42,6 +42,7 @@ public enum ErrorCode {
     //ConflictException
     DUPLICATED_EMAIL("4090", "이미 사용 중인 이메일입니다."),
     RECIPE_INGREDIENT_CONFLICT("4091", "이미 해당 레시피에 존재하는 재료입니다."),
+    USER_ALREADY_ADD_LIKE("4092", "해당 레시피는 이미 좋아요를 누른 레시피입니다.");
 
     //InternetException
     FILE_STORAGE_ERROR("5000", "파일을 업로드할 수 없습니다.");
