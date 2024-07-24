@@ -11,6 +11,9 @@ import java.util.UUID;
 
 public interface RecipeService {
 
+    //레시피 목록 조회
+    public RecipeListDto getList(String keyword, String type, int page, int size);
+
     //레시피 등록
     public void register(RegisterRecipeDto registerRecipeDto, User user);
 
