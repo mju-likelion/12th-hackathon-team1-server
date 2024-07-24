@@ -17,6 +17,7 @@ public enum ErrorCode {
     NOT_NULL("4005", "필수값이 공백입니다."),
     DUPLICATED_RECIPE_INGREDIENT("4006","중복되는 레시피 재료 관련 요청은 불가합니다."),
     FILE_TYPE_ERROR("4007", "유효하지 않은 파일 형식입니다."),
+    IMAGE_NOT_IN_RECIPE("4008", "이미지가 존재하지 않는 레시피입니다."),
 
     //AuthorizedException
     COOKIE_NOT_FOUND("4010", "쿠키를 찾을 수 없습니다."),
@@ -35,13 +36,15 @@ public enum ErrorCode {
     FRIDGE_NOT_FOUND("4044","냉장고를 찾을 수 없습니다"),
     FRIDGE_ITEM_NOT_FOUND("4045","냉장고에 등록된 재료 정보를 찾을 수 없습니다."),
     PAGE_NOT_FOUND("4046", "페이지를 찾을 수 없습니다"),
+    IMAGE_NOT_FOUND("4047","이미지를 찾을 수 없습니다"),
+
 
     //ConflictException
     DUPLICATED_EMAIL("4090", "이미 사용 중인 이메일입니다."),
     RECIPE_INGREDIENT_CONFLICT("4091", "이미 해당 레시피에 존재하는 재료입니다."),
 
     //InternetException
-    FILE_STORAGE_ERROR("5000", "파일을  업로드할 수 없습니다.");
+    FILE_STORAGE_ERROR("5000", "파일을 업로드할 수 없습니다.");
 
     private final String code;
     private final String message;

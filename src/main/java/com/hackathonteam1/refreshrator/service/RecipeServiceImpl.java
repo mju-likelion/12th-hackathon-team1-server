@@ -7,7 +7,6 @@ import com.hackathonteam1.refreshrator.dto.request.recipe.RegisterRecipeDto;
 import com.hackathonteam1.refreshrator.dto.response.file.ImageDto;
 import com.hackathonteam1.refreshrator.dto.response.recipe.DetailRecipeDto;
 
-
 import com.hackathonteam1.refreshrator.dto.response.recipe.RecipeListDto;
 import com.hackathonteam1.refreshrator.entity.Ingredient;
 import com.hackathonteam1.refreshrator.entity.IngredientRecipe;
@@ -18,6 +17,7 @@ import com.hackathonteam1.refreshrator.exception.ConflictException;
 import com.hackathonteam1.refreshrator.exception.FileStorageException;
 import com.hackathonteam1.refreshrator.exception.ForbiddenException;
 import com.hackathonteam1.refreshrator.exception.NotFoundException;
+
 import com.hackathonteam1.refreshrator.exception.errorcode.ErrorCode;
 import com.hackathonteam1.refreshrator.repository.ImageRepository;
 import com.hackathonteam1.refreshrator.repository.IngredientRecipeRepository;
@@ -191,6 +191,25 @@ public class RecipeServiceImpl implements RecipeService{
         imageRepository.save(image);
         ImageDto imageDto = ImageDto.mapping(image);
         return imageDto;
+    }
+
+    @Override
+    public void deleteImage(UUID imageId, User user) {
+        Image image = findImageByImageId(imageId);
+        Recipe recipe = image.getRecipe();
+
+        if(!recipe.isContainingImage()){
+            throw new BadRequestException(ErrorCode.IMAGE_NOT_IN_RECIPE);
+        }
+
+        checkAuth(recipe.getUser(), user);
+        recipe.deleteImage();
+        s3Uploader.removeS3File(image.getUrl().split("/")[3]);
+        imageRepository.delete(image);
+    }
+
+    private Image findImageByImageId(UUID imageId){
+        return imageRepository.findById(imageId).orElseThrow(()->new NotFoundException(ErrorCode.IMAGE_NOT_FOUND));
     }
 
     private Ingredient findIngredientByIngredientId(UUID ingredientId){
