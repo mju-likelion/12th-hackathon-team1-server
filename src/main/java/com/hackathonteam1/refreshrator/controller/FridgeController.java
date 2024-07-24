@@ -4,6 +4,7 @@ import com.hackathonteam1.refreshrator.annotation.AuthenticatedUser;
 import com.hackathonteam1.refreshrator.dto.ResponseDto;
 import com.hackathonteam1.refreshrator.dto.request.fridge.AddFridgeDto;
 import com.hackathonteam1.refreshrator.dto.response.fridge.FridgeItemListDto;
+import com.hackathonteam1.refreshrator.dto.response.fridgeItem.FridgeItemResponseData;
 import com.hackathonteam1.refreshrator.entity.User;
 import com.hackathonteam1.refreshrator.service.FridgeService;
 import jakarta.validation.Valid;

@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -83,7 +84,15 @@ public class RecipeController {
             @AuthenticatedUser User user){
         RecipeListDto recipeListDto = recipeService.getRecommendation(page, size, match, type, user);
         return new ResponseEntity<>(ResponseDto.res(HttpStatus.OK,"추천 레시피 목록 조회 성공", recipeListDto),HttpStatus.OK);
+    }
 
+    // 레시피에 좋아요 추가
+    @PostMapping("/{recipe_id}/like")
+    public ResponseEntity<ResponseDto<Void>> addLikeToRecipe(@PathVariable("recipe_id") UUID recipeId, @AuthenticatedUser User user){
+        recipeService.addLikeToRecipe(user, recipeId);
+        return new ResponseEntity<>(ResponseDto.res(HttpStatus.CREATED, "레시피에 좋아요 추가 성공"),HttpStatus.CREATED);
+    }
+    
     @PostMapping(value = "/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE )
     public ResponseEntity<ResponseDto<ImageDto>> registerFile(
             @RequestPart MultipartFile file){
