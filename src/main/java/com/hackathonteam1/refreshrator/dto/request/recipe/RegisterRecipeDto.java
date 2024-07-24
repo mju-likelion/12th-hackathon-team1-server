@@ -7,11 +7,14 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 import java.util.UUID;
 
 @Getter
+@AllArgsConstructor
+@NoArgsConstructor
 public class RegisterRecipeDto {
 
     @Size(min = 1, max = 20)
@@ -21,8 +24,10 @@ public class RegisterRecipeDto {
     @NotNull
     private List<UUID> ingredientIds;
 
-    @Size(min = 1)
+    @Size(max = 5000)
     @NotBlank
     private String cookingStep;
+
+    private UUID imageId;
 
 }

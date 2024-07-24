@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.UUID;
+
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
@@ -13,6 +15,8 @@ public class ModifyRecipeDto {
     @Size(min = 1, max = 20)
     private String name;
 
-    @Size(min = 1)
+    @Size(max = 5000)
     private String cookingStep;
+
+    private UUID imageId;
 }
