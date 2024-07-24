@@ -16,6 +16,9 @@ public class ImageDto {
     private String url;
 
     public static ImageDto mapping(Image image){
+        if(image==null){
+            return null;
+        }
         return new ImageDto(image.getId(), image.getUrl());
     }
 }
