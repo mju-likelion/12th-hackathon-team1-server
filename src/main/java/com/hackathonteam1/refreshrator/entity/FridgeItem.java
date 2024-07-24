@@ -37,4 +37,7 @@ public class FridgeItem extends BaseEntity{
     public enum Storage{
         STORE_AT_ROOM_TEMPERATURE, REFRIGERATED, FROZEN;
     }
+    public boolean isExpired(){
+        return this.expiredDate.isAfter(LocalDate.now());
+    }
 }
