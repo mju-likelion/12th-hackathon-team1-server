@@ -1,5 +1,8 @@
 package com.hackathonteam1.refreshrator.entity;
 
+import com.hackathonteam1.refreshrator.exception.ConflictException;
+import com.hackathonteam1.refreshrator.exception.errorcode.ErrorCode;
+import io.micrometer.common.lang.Nullable;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Formula;
@@ -18,6 +21,7 @@ public class Recipe extends BaseEntity{
     private String name;
 
     @Column(nullable = false)
+    @Lob
     private String cookingStep;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -31,6 +35,7 @@ public class Recipe extends BaseEntity{
 
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "image_id")
+    @Nullable
     private Image image;
 
     @Formula("(select count(rl.id) from recipe_like rl where rl.recipe_id = id)")
@@ -41,6 +46,12 @@ public class Recipe extends BaseEntity{
     }
     public void updateCookingStep(String cookingStep){
         this.cookingStep = cookingStep;
+    }
+    public void updateImage(Image image){
+        if(this.image != null){
+            throw new ConflictException(ErrorCode.RECIPE_IMAGE_CONFLICT);
+        }
+        this.image = image;
     }
 
     public Boolean isContainingImage(){
