@@ -6,14 +6,12 @@ import com.hackathonteam1.refreshrator.dto.request.recipe.ModifyRecipeDto;
 import com.hackathonteam1.refreshrator.dto.request.recipe.RegisterRecipeDto;
 import com.hackathonteam1.refreshrator.dto.response.recipe.DetailRecipeDto;
 import com.hackathonteam1.refreshrator.dto.response.recipe.RecipeListDto;
-import com.hackathonteam1.refreshrator.entity.Ingredient;
-import com.hackathonteam1.refreshrator.entity.IngredientRecipe;
-import com.hackathonteam1.refreshrator.entity.Recipe;
-import com.hackathonteam1.refreshrator.entity.User;
+import com.hackathonteam1.refreshrator.entity.*;
 import com.hackathonteam1.refreshrator.exception.ConflictException;
 import com.hackathonteam1.refreshrator.exception.ForbiddenException;
 import com.hackathonteam1.refreshrator.exception.NotFoundException;
 import com.hackathonteam1.refreshrator.exception.errorcode.ErrorCode;
+import com.hackathonteam1.refreshrator.repository.FridgeRepository;
 import com.hackathonteam1.refreshrator.repository.IngredientRecipeRepository;
 import com.hackathonteam1.refreshrator.repository.IngredientRepository;
 import com.hackathonteam1.refreshrator.repository.RecipeRepository;
@@ -38,6 +36,7 @@ public class RecipeServiceImpl implements RecipeService{
     private final RecipeRepository recipeRepository;
     private final IngredientRepository ingredientRepository;
     private final IngredientRecipeRepository ingredientRecipeRepository;
+    private final FridgeRepository fridgeRepository;
 
     @Override
     public RecipeListDto getList(String keyword, String type, int page, int size) {
@@ -151,6 +150,32 @@ public class RecipeServiceImpl implements RecipeService{
             ingredientRecipeRepository.deleteById(i);
         });
 
+    }
+
+    @Override
+    public RecipeListDto getRecommendation(int page, int size, int match, String type, User user) {
+        Set<FridgeItem> userFridgeItems = findFridgeByUser(user).getFridgeItem().stream()
+                .filter(fridgeItem -> !fridgeItem.isExpired())
+                .collect(Collectors.toSet());
+
+        Set<Ingredient> usersIngredients = userFridgeItems.stream().map(i -> i.getIngredient()).collect(Collectors.toSet());
+
+        Sort sort;
+        if (type.equals("popularity")){
+            sort = Sort.by(Sort.Order.desc("likeCount"));
+        }else{
+            sort = Sort.by(Sort.Order.desc("createdAt"));
+        }
+
+        Pageable pageable = PageRequest.of(page,size,sort);
+
+        Page<Recipe> resultPages = recipeRepository.findAllByIngredientRecipesContain(usersIngredients, match, pageable);
+        RecipeListDto recipeListDto = RecipeListDto.mapping(resultPages);
+        return recipeListDto;
+    }
+
+    private Fridge findFridgeByUser(User user){
+        return fridgeRepository.findByUser(user).orElseThrow(()-> new NotFoundException(ErrorCode.FRIDGE_NOT_FOUND));
     }
 
     private Ingredient findIngredientByIngredientId(UUID ingredientId){
