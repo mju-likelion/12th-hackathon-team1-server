@@ -6,6 +6,7 @@ import com.hackathonteam1.refreshrator.dto.request.recipe.DeleteIngredientRecipe
 import com.hackathonteam1.refreshrator.dto.request.recipe.RegisterIngredientRecipesDto;
 import com.hackathonteam1.refreshrator.dto.request.recipe.ModifyRecipeDto;
 import com.hackathonteam1.refreshrator.dto.request.recipe.RegisterRecipeDto;
+import com.hackathonteam1.refreshrator.dto.response.file.ImageDto;
 import com.hackathonteam1.refreshrator.dto.response.recipe.DetailRecipeDto;
 import com.hackathonteam1.refreshrator.dto.response.recipe.RecipeListDto;
 import com.hackathonteam1.refreshrator.entity.User;
@@ -13,8 +14,11 @@ import com.hackathonteam1.refreshrator.service.RecipeService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.UUID;
 
@@ -69,6 +73,27 @@ public class RecipeController {
                                                                     @RequestBody @Valid DeleteIngredientRecipesDto deleteIngredientRecipesDto, @AuthenticatedUser User user){
         recipeService.deleteIngredientRecipe(user, recipeId, deleteIngredientRecipesDto);
         return new ResponseEntity<>(ResponseDto.res(HttpStatus.OK, "레시피 재료 삭제 성공"),HttpStatus.OK);
+    }
+
+    // 레시피에 좋아요 추가
+    @PostMapping("/{recipe_id}/like")
+    public ResponseEntity<ResponseDto<Void>> addLikeToRecipe(@PathVariable("recipe_id") UUID recipeId, @AuthenticatedUser User user){
+        recipeService.addLikeToRecipe(user, recipeId);
+        return new ResponseEntity<>(ResponseDto.res(HttpStatus.CREATED, "레시피에 좋아요 추가 성공"),HttpStatus.CREATED);
+    }
+    
+    @PostMapping(value = "/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE )
+    public ResponseEntity<ResponseDto<ImageDto>> registerFile(
+            @RequestPart MultipartFile file){
+        ImageDto imageDto =  recipeService.registerImage(file);
+        return new ResponseEntity<>(ResponseDto.res(HttpStatus.OK, "이미지 등록 성공", imageDto),HttpStatus.OK);
+    }
+
+    @DeleteMapping(value = "/images/{image_Id}")
+    public ResponseEntity<ResponseDto<Void>> deleteFile(
+            @PathVariable UUID image_Id,@AuthenticatedUser User user){
+        recipeService.deleteImage(image_Id, user);
+        return new ResponseEntity<>(ResponseDto.res(HttpStatus.OK, "이미지 삭제 성공"),HttpStatus.OK);
     }
 
 }

@@ -43,4 +43,11 @@ public class Recipe extends BaseEntity{
         this.cookingStep = cookingStep;
     }
 
+    public Boolean isContainingImage(){
+        return this.getImage()!=null;
+    }
+
+    public void deleteImage(){
+        this.image = null;
+    }
 }
