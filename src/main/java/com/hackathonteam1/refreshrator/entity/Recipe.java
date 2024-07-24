@@ -2,6 +2,7 @@ package com.hackathonteam1.refreshrator.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Formula;
 
 import java.util.List;
 
@@ -31,6 +32,9 @@ public class Recipe extends BaseEntity{
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "image_id")
     private Image image;
+
+    @Formula("(select count(rl.id) from recipe_like rl where rl.recipe_id = id)")
+    private int likeCount;
 
     public void updateName(String name){
         this.name = name;

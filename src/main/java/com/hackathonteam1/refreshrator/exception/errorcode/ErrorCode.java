@@ -35,7 +35,9 @@ public enum ErrorCode {
     INGREDIENT_RECIPE_NOT_FOUND("4043", "레시피의 재료를 찾을 수 없습니다."),
     FRIDGE_NOT_FOUND("4044","냉장고를 찾을 수 없습니다"),
     FRIDGE_ITEM_NOT_FOUND("4045","냉장고에 등록된 재료 정보를 찾을 수 없습니다."),
-    IMAGE_NOT_FOUND("4046","이미지를 찾을 수 없습니다"),
+    PAGE_NOT_FOUND("4046", "페이지를 찾을 수 없습니다"),
+    IMAGE_NOT_FOUND("4047","이미지를 찾을 수 없습니다"),
+
 
     //ConflictException
     DUPLICATED_EMAIL("4090", "이미 사용 중인 이메일입니다."),

@@ -8,6 +8,7 @@ import com.hackathonteam1.refreshrator.dto.request.recipe.ModifyRecipeDto;
 import com.hackathonteam1.refreshrator.dto.request.recipe.RegisterRecipeDto;
 import com.hackathonteam1.refreshrator.dto.response.file.ImageDto;
 import com.hackathonteam1.refreshrator.dto.response.recipe.DetailRecipeDto;
+import com.hackathonteam1.refreshrator.dto.response.recipe.RecipeListDto;
 import com.hackathonteam1.refreshrator.entity.User;
 import com.hackathonteam1.refreshrator.service.RecipeService;
 import jakarta.validation.Valid;
@@ -25,6 +26,13 @@ import java.util.UUID;
 @RequestMapping("/recipes")
 public class RecipeController {
     private final RecipeService recipeService;
+
+    @GetMapping
+    public ResponseEntity<ResponseDto<RecipeListDto>> getList(@RequestParam(name = "keyword",defaultValue = "")String keyword, @RequestParam(name = "type", defaultValue = "newest")String type,
+                                                              @RequestParam(name = "page", defaultValue = "0")int page, @RequestParam(name = "size", defaultValue = "10")int size){
+        RecipeListDto recipeListDto = recipeService.getList(keyword, type, page, size);
+        return new ResponseEntity<>(ResponseDto.res(HttpStatus.OK,"레시피 목록 조회 성공", recipeListDto),HttpStatus.OK);
+    }
 
     @PostMapping
     public ResponseEntity<ResponseDto<Void>> register(
