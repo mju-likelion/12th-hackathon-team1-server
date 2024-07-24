@@ -75,6 +75,17 @@ public class RecipeController {
         return new ResponseEntity<>(ResponseDto.res(HttpStatus.OK, "레시피 재료 삭제 성공"),HttpStatus.OK);
     }
 
+    @GetMapping("/recommendations")
+    public ResponseEntity<ResponseDto<RecipeListDto>> getRecommendations(
+            @RequestParam(name = "page", defaultValue = "0")int page,
+            @RequestParam(name = "size", defaultValue = "10")int size,
+            @RequestParam(name = "match", defaultValue = "2147483647")int match,
+            @RequestParam(name = "type", defaultValue = "newest")String type,
+            @AuthenticatedUser User user){
+        RecipeListDto recipeListDto = recipeService.getRecommendation(page, size, match, type, user);
+        return new ResponseEntity<>(ResponseDto.res(HttpStatus.OK,"추천 레시피 목록 조회 성공", recipeListDto),HttpStatus.OK);
+    }
+
     // 레시피에 좋아요 추가
     @PostMapping("/{recipe_id}/like")
     public ResponseEntity<ResponseDto<Void>> addLikeToRecipe(@PathVariable("recipe_id") UUID recipeId, @AuthenticatedUser User user){
@@ -94,6 +105,7 @@ public class RecipeController {
             @PathVariable UUID image_Id,@AuthenticatedUser User user){
         recipeService.deleteImage(image_Id, user);
         return new ResponseEntity<>(ResponseDto.res(HttpStatus.OK, "이미지 삭제 성공"),HttpStatus.OK);
+
     }
 
 }
