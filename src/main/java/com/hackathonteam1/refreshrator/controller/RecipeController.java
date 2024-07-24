@@ -71,4 +71,14 @@ public class RecipeController {
         return new ResponseEntity<>(ResponseDto.res(HttpStatus.OK, "레시피 재료 삭제 성공"),HttpStatus.OK);
     }
 
+    @GetMapping("/recommendations")
+    public ResponseEntity<ResponseDto<RecipeListDto>> getRecommendations(
+            @RequestParam(name = "page", defaultValue = "0")int page,
+            @RequestParam(name = "size", defaultValue = "10")int size,
+            @RequestParam(name = "match", defaultValue = "2147483647")int match,
+            @AuthenticatedUser User user){
+        RecipeListDto recipeListDto = recipeService.getRecommendation(page, size, match, user);
+        return new ResponseEntity<>(ResponseDto.res(HttpStatus.OK,"추천 레시피 목록 조회 성공", recipeListDto),HttpStatus.OK);
+    }
+
 }
