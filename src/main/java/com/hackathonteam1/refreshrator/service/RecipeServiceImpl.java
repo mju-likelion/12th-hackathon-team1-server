@@ -204,6 +204,7 @@ public class RecipeServiceImpl implements RecipeService{
         Pageable pageable = PageRequest.of(page,size,sort);
 
         Page<Recipe> resultPages = recipeRepository.findAllByIngredientRecipesContain(usersIngredients, match, pageable);
+        checkValidPage(resultPages, page);
         RecipeListDto recipeListDto = RecipeListDto.mapping(resultPages);
         return recipeListDto;
     }
