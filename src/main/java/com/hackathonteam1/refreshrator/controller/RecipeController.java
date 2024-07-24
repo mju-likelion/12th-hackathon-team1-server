@@ -76,8 +76,9 @@ public class RecipeController {
             @RequestParam(name = "page", defaultValue = "0")int page,
             @RequestParam(name = "size", defaultValue = "10")int size,
             @RequestParam(name = "match", defaultValue = "2147483647")int match,
+            @RequestParam(name = "type", defaultValue = "newest")String type,
             @AuthenticatedUser User user){
-        RecipeListDto recipeListDto = recipeService.getRecommendation(page, size, match, user);
+        RecipeListDto recipeListDto = recipeService.getRecommendation(page, size, match, type, user);
         return new ResponseEntity<>(ResponseDto.res(HttpStatus.OK,"추천 레시피 목록 조회 성공", recipeListDto),HttpStatus.OK);
     }
 
