@@ -17,20 +17,6 @@ import java.util.List;
 public class IngredientService {
     private final IngredientRepository ingredientRepository;
 
-    public IngredientListDto showAllIngredients() {
-        List<Ingredient> ingredients = ingredientRepository.findAll();
-        List<IngredientDto> ingredientDtoList = new ArrayList<>();
-
-        for (Ingredient ingredient : ingredients) {
-            IngredientDto ingredientDto = IngredientDto.builder()
-                    .id(ingredient.getId())
-                    .name(ingredient.getName())
-                    .build();
-            ingredientDtoList.add(ingredientDto);
-        }
-        return new IngredientListDto(ingredientDtoList);
-    }
-
     public IngredientListDto searchIngredientByName(String name) {
         List<Ingredient> ingredients = ingredientRepository.findAll();
         List<IngredientDto> ingredientDtoList = new ArrayList<>();
