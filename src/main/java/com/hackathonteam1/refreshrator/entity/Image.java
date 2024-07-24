@@ -18,4 +18,6 @@ public class Image extends BaseEntity{
     @Column(nullable = false)
     private String url; //aws s3의 url
 
+    @OneToOne(mappedBy = "image", cascade = CascadeType.PERSIST)
+    private Recipe recipe;
 }

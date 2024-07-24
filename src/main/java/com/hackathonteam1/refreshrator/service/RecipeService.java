@@ -4,10 +4,13 @@ import com.hackathonteam1.refreshrator.dto.request.recipe.DeleteIngredientRecipe
 import com.hackathonteam1.refreshrator.dto.request.recipe.RegisterIngredientRecipesDto;
 import com.hackathonteam1.refreshrator.dto.request.recipe.ModifyRecipeDto;
 import com.hackathonteam1.refreshrator.dto.request.recipe.RegisterRecipeDto;
+import com.hackathonteam1.refreshrator.dto.response.file.ImageDto;
 import com.hackathonteam1.refreshrator.dto.response.recipe.DetailRecipeDto;
+
 import com.hackathonteam1.refreshrator.dto.response.recipe.RecipeListDto;
 import com.hackathonteam1.refreshrator.entity.Recipe;
 import com.hackathonteam1.refreshrator.entity.User;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.UUID;
 
@@ -36,5 +39,12 @@ public interface RecipeService {
 
     //추천 레시피 목록 조회
     public RecipeListDto getRecommendation(int page, int size, int match, String type, User user);
+
+    //파일(이미지) 등록
+    public ImageDto registerImage(MultipartFile file);
+
+    //파일(이미지) 삭제
+    public void deleteImage(UUID imageId, User user);
+
 
 }
