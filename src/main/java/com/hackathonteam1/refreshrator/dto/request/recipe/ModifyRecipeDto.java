@@ -12,7 +12,7 @@ import java.util.UUID;
 @NoArgsConstructor
 public class ModifyRecipeDto {
 
-    @Size(min = 1, max = 20)
+    @Size(min = 1, max = 15)
     private String name;
 
     @Size(max = 5000)

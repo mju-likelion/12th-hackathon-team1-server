@@ -17,7 +17,7 @@ import java.util.UUID;
 @NoArgsConstructor
 public class RegisterRecipeDto {
 
-    @Size(min = 1, max = 20)
+    @Size(min = 1, max = 15)
     @NotBlank
     private String name;
 
