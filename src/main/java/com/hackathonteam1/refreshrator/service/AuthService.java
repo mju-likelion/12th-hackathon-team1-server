@@ -102,8 +102,16 @@ public class AuthService {
         Page<RecipeLike> recipeLikes = this.recipeLikeRepository.findAllByUser(user, pageable);
         List<Recipe> recipes = recipeLikes.stream().map(like -> like.getRecipe()).collect(Collectors.toList());
         Page<Recipe> recipePage = new PageImpl<>(recipes);
-        RecipeListDto recipeListDto = RecipeListDto.mapping(recipePage);
 
+        checkValidPage(recipePage, page);
+
+        RecipeListDto recipeListDto = RecipeListDto.mapping(recipePage);
         return recipeListDto;
+    }
+
+    private <T> void checkValidPage(Page<T> pages, int page){
+        if(pages.getTotalPages() <= page && page != 0){
+            throw new NotFoundException(ErrorCode.PAGE_NOT_FOUND);
+        }
     }
 }
