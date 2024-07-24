@@ -7,6 +7,7 @@ import com.hackathonteam1.refreshrator.dto.ResponseDto;
 import com.hackathonteam1.refreshrator.dto.request.auth.LoginDto;
 import com.hackathonteam1.refreshrator.dto.request.auth.SigninDto;
 import com.hackathonteam1.refreshrator.dto.response.auth.TokenResponseDto;
+import com.hackathonteam1.refreshrator.dto.response.recipe.RecipeListReponseDto;
 import com.hackathonteam1.refreshrator.entity.User;
 import com.hackathonteam1.refreshrator.service.AuthService;
 import jakarta.servlet.http.HttpServletResponse;
@@ -81,5 +82,12 @@ public class AuthController {
         response.addHeader("set-cookie", cookie.toString());
 
         return new ResponseEntity<>(ResponseDto.res(HttpStatus.OK, "로그아웃 완료"), HttpStatus.OK);
+    }
+
+    // 좋아요 누른 레시피 목록 조회
+    @GetMapping("/likes")
+    public ResponseEntity<ResponseDto<RecipeListReponseDto>> showAllRecipeLikes(@AuthenticatedUser User user) {
+        RecipeListReponseDto recipeListReponseDto = authService.showAllRecipeLikes(user);
+        return new ResponseEntity<>(ResponseDto.res(HttpStatus.OK, "좋아요 누른 레시피 목록 조회 성공", recipeListReponseDto), HttpStatus.OK);
     }
 }

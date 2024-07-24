@@ -5,16 +5,24 @@ import com.hackathonteam1.refreshrator.authentication.PasswordHashEncryption;
 import com.hackathonteam1.refreshrator.dto.request.auth.LoginDto;
 import com.hackathonteam1.refreshrator.dto.request.auth.SigninDto;
 import com.hackathonteam1.refreshrator.dto.response.auth.TokenResponseDto;
+import com.hackathonteam1.refreshrator.dto.response.recipe.RecipeListReponseDto;
+import com.hackathonteam1.refreshrator.dto.response.recipe.RecipeResponseDto;
 import com.hackathonteam1.refreshrator.entity.Fridge;
+import com.hackathonteam1.refreshrator.entity.RecipeLike;
 import com.hackathonteam1.refreshrator.entity.User;
 import com.hackathonteam1.refreshrator.exception.ConflictException;
 import com.hackathonteam1.refreshrator.exception.ForbiddenException;
 import com.hackathonteam1.refreshrator.exception.NotFoundException;
 import com.hackathonteam1.refreshrator.exception.errorcode.ErrorCode;
 import com.hackathonteam1.refreshrator.repository.FridgeRepository;
+import com.hackathonteam1.refreshrator.repository.RecipeLikeRepository;
 import com.hackathonteam1.refreshrator.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @AllArgsConstructor
@@ -23,6 +31,7 @@ public class AuthService {
     private final FridgeRepository fridgeRepository;
     private final PasswordHashEncryption passwordHashEncryption;
     private final JwtTokenProvider jwtTokenProvider;
+    private final RecipeLikeRepository recipeLikeRepository;
 
     //회원가입
     public void signin(SigninDto signinDto){
@@ -78,5 +87,34 @@ public class AuthService {
         String accessToken = jwtTokenProvider.createToken(payload);
 
         return new TokenResponseDto(accessToken);
+    }
+
+    // 좋아요 누른 레시피 목록 조회
+    public RecipeListReponseDto showAllRecipeLikes(User user) {
+//        List<RecipeLike> recipeLikes = this.findMyLikeList(user);
+        List<RecipeResponseDto> recipeListReponseDtos = new ArrayList<>();
+
+        List<RecipeLike> recipeLikes = this.findMyLikeList(user);
+
+        for(RecipeLike recipeLike : recipeLikes){
+            RecipeResponseDto recipeResponseDto = RecipeResponseDto.builder()
+                    .recipeId(recipeLike.getRecipe().getId())
+                    .name(recipeLike.getRecipe().getName())
+                    .build();
+            recipeListReponseDtos.add(recipeResponseDto);
+        }
+        return new RecipeListReponseDto(recipeListReponseDtos);
+    }
+
+    public List<RecipeLike> findMyLikeList(User user) {
+        List<RecipeLike> recipeLikes = this.recipeLikeRepository.findAll();
+        List<RecipeLike> result = new ArrayList<>();
+        for(RecipeLike recipeLike : recipeLikes){
+            if(user.getId().equals(recipeLike.getUser().getId())){
+                result.add(recipeLike);
+            }
+        }
+        return result;
+
     }
 }
