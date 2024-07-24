@@ -18,8 +18,7 @@ public class Fridge extends BaseEntity{
     @OneToMany(mappedBy = "fridge", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<FridgeItem> fridgeItem;
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "user_id")
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id",nullable = false)
     private User user;
-
 }

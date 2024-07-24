@@ -1,11 +1,13 @@
 package com.hackathonteam1.refreshrator.controller;
 
+import com.hackathonteam1.refreshrator.annotation.AuthenticatedUser;
 import com.hackathonteam1.refreshrator.authentication.AuthenticationExtractor;
 import com.hackathonteam1.refreshrator.authentication.JwtEncoder;
 import com.hackathonteam1.refreshrator.dto.ResponseDto;
 import com.hackathonteam1.refreshrator.dto.request.auth.LoginDto;
 import com.hackathonteam1.refreshrator.dto.request.auth.SigninDto;
 import com.hackathonteam1.refreshrator.dto.response.auth.TokenResponseDto;
+import com.hackathonteam1.refreshrator.entity.User;
 import com.hackathonteam1.refreshrator.service.AuthService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -33,6 +35,22 @@ public class AuthController {
         return new ResponseEntity<>(ResponseDto.res(HttpStatus.CREATED, "회원 가입 완료"), HttpStatus.CREATED);
     }
 
+    //회원 탈퇴
+    @DeleteMapping("/leave")
+    public ResponseEntity<ResponseDto<Void>> leave(@AuthenticatedUser User user,HttpServletResponse response) {
+        authService.leave(user);
+
+        ResponseCookie cookie = ResponseCookie.from("AccessToken", null)
+                .maxAge(0)
+                .path("/")
+                .httpOnly(true)
+                .sameSite("None").secure(true)
+                .build();
+        response.addHeader("set-cookie", cookie.toString());
+
+        return new ResponseEntity<>(ResponseDto.res(HttpStatus.OK, "회원 탈퇴 완료"), HttpStatus.OK);
+    }
+
     //로그인
     @PostMapping("/login")
     public ResponseEntity<ResponseDto<Void>> login(@RequestBody @Valid LoginDto loginDto, HttpServletResponse response) {
@@ -53,7 +71,7 @@ public class AuthController {
 
     //로그아웃
     @PostMapping("/logout")
-    public ResponseEntity<ResponseDto<Void>> logout(final HttpServletResponse response) {
+    public ResponseEntity<ResponseDto<Void>> logout(@AuthenticatedUser User user, final HttpServletResponse response) {
         ResponseCookie cookie = ResponseCookie.from("AccessToken", null)
                 .maxAge(0)
                 .path("/")

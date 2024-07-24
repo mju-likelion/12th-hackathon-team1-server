@@ -4,20 +4,42 @@ import com.hackathonteam1.refreshrator.dto.request.recipe.DeleteIngredientRecipe
 import com.hackathonteam1.refreshrator.dto.request.recipe.RegisterIngredientRecipesDto;
 import com.hackathonteam1.refreshrator.dto.request.recipe.ModifyRecipeDto;
 import com.hackathonteam1.refreshrator.dto.request.recipe.RegisterRecipeDto;
+import com.hackathonteam1.refreshrator.dto.response.file.ImageDto;
 import com.hackathonteam1.refreshrator.dto.response.recipe.DetailRecipeDto;
 import com.hackathonteam1.refreshrator.entity.*;
+
+import com.hackathonteam1.refreshrator.dto.response.recipe.RecipeListDto;
+import com.hackathonteam1.refreshrator.entity.Ingredient;
+import com.hackathonteam1.refreshrator.entity.IngredientRecipe;
+import com.hackathonteam1.refreshrator.entity.Recipe;
+import com.hackathonteam1.refreshrator.entity.User;
+
 import com.hackathonteam1.refreshrator.exception.ConflictException;
+import com.hackathonteam1.refreshrator.exception.FileStorageException;
 import com.hackathonteam1.refreshrator.exception.ForbiddenException;
 import com.hackathonteam1.refreshrator.exception.NotFoundException;
+
 import com.hackathonteam1.refreshrator.exception.errorcode.ErrorCode;
+import com.hackathonteam1.refreshrator.repository.ImageRepository;
 import com.hackathonteam1.refreshrator.repository.IngredientRecipeRepository;
 import com.hackathonteam1.refreshrator.repository.IngredientRepository;
 import com.hackathonteam1.refreshrator.repository.RecipeRepository;
+import com.hackathonteam1.refreshrator.util.S3Uploader;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.http.MediaType;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -31,6 +53,31 @@ public class RecipeServiceImpl implements RecipeService{
     private final RecipeRepository recipeRepository;
     private final IngredientRepository ingredientRepository;
     private final IngredientRecipeRepository ingredientRecipeRepository;
+    private final S3Uploader s3Uploader;
+    private final ImageRepository imageRepository;
+
+    @Override
+    public RecipeListDto getList(String keyword, String type, int page, int size) {
+
+        Sort sort;
+        if (type.equals("newest")){
+            sort = Sort.by(Sort.Order.desc("createdAt"));
+        }else{
+            sort = Sort.by(Sort.Order.desc("likeCount"));
+        }
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        if(keyword.equals("")){
+            Page<Recipe> recipePage = recipeRepository.findAll(pageable);
+            checkValidPage(recipePage, page);
+            return RecipeListDto.mapping(recipePage);
+        }
+
+        Page<Recipe> recipePage = recipeRepository.findAllByNameContaining(keyword, pageable);
+        checkValidPage(recipePage, page);
+        return RecipeListDto.mapping(recipePage);
+    }
 
     @Override
     @Transactional
@@ -123,6 +170,50 @@ public class RecipeServiceImpl implements RecipeService{
 
     }
 
+    @Override
+    public ImageDto registerImage(MultipartFile file) {
+
+        if(!file.getContentType().equals(MediaType.IMAGE_GIF_VALUE) &&
+                !file.getContentType().equals(MediaType.IMAGE_PNG_VALUE) &&
+                !file.getContentType().equals(MediaType.IMAGE_JPEG_VALUE) ){
+            throw new FileStorageException(ErrorCode.FILE_TYPE_ERROR);
+        }
+
+        String url;
+        try {
+           url = s3Uploader.upload(file);
+        } catch (IOException e) {
+            throw new FileStorageException(ErrorCode.FILE_STORAGE_ERROR, e.getMessage());
+        }
+
+        Image image = Image.builder()
+                .url(url)
+                .build();
+
+        imageRepository.save(image);
+        ImageDto imageDto = ImageDto.mapping(image);
+        return imageDto;
+    }
+
+    @Override
+    public void deleteImage(UUID imageId, User user) {
+        Image image = findImageByImageId(imageId);
+        Recipe recipe = image.getRecipe();
+
+        if(!recipe.isContainingImage()){
+            throw new BadRequestException(ErrorCode.IMAGE_NOT_IN_RECIPE);
+        }
+
+        checkAuth(recipe.getUser(), user);
+        recipe.deleteImage();
+        s3Uploader.removeS3File(image.getUrl().split("/")[3]);
+        imageRepository.delete(image);
+    }
+
+    private Image findImageByImageId(UUID imageId){
+        return imageRepository.findById(imageId).orElseThrow(()->new NotFoundException(ErrorCode.IMAGE_NOT_FOUND));
+    }
+
     private Ingredient findIngredientByIngredientId(UUID ingredientId){
         return ingredientRepository.findById(ingredientId).orElseThrow(()-> new NotFoundException(ErrorCode.INGREDIENT_NOT_FOUND));
     }
@@ -177,6 +268,12 @@ public class RecipeServiceImpl implements RecipeService{
     private void checkAuth(User writer, User user){
         if(!writer.getId().equals(user.getId())){
             throw new ForbiddenException(ErrorCode.RECIPE_FORBIDDEN);
+        }
+    }
+
+    private <T> void checkValidPage(Page<T> pages, int page){
+        if(pages.getTotalPages() <= page && page != 0){
+            throw new NotFoundException(ErrorCode.PAGE_NOT_FOUND);
         }
     }
 }
