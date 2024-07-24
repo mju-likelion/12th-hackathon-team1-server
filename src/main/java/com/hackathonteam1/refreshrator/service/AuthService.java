@@ -5,9 +5,10 @@ import com.hackathonteam1.refreshrator.authentication.PasswordHashEncryption;
 import com.hackathonteam1.refreshrator.dto.request.auth.LoginDto;
 import com.hackathonteam1.refreshrator.dto.request.auth.SigninDto;
 import com.hackathonteam1.refreshrator.dto.response.auth.TokenResponseDto;
-import com.hackathonteam1.refreshrator.dto.response.recipe.RecipeListReponseDto;
-import com.hackathonteam1.refreshrator.dto.response.recipe.RecipeResponseDto;
+import com.hackathonteam1.refreshrator.dto.response.recipe.RecipeDto;
+import com.hackathonteam1.refreshrator.dto.response.recipe.RecipeListDto;
 import com.hackathonteam1.refreshrator.entity.Fridge;
+import com.hackathonteam1.refreshrator.entity.Recipe;
 import com.hackathonteam1.refreshrator.entity.RecipeLike;
 import com.hackathonteam1.refreshrator.entity.User;
 import com.hackathonteam1.refreshrator.exception.ConflictException;
@@ -18,11 +19,12 @@ import com.hackathonteam1.refreshrator.repository.FridgeRepository;
 import com.hackathonteam1.refreshrator.repository.RecipeLikeRepository;
 import com.hackathonteam1.refreshrator.repository.UserRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -90,18 +92,18 @@ public class AuthService {
     }
 
     // 좋아요 누른 레시피 목록 조회
-    public RecipeListReponseDto showAllRecipeLikes(User user) {
-        List<RecipeResponseDto> recipeListReponseDtos = new ArrayList<>();
+    public RecipeListDto showAllRecipeLikes(User user, int page, int size) {
+        List<RecipeDto> recipeLists = new ArrayList<>();
 
-        List<RecipeLike> recipeLikes = this.recipeLikeRepository.findAllByUser(user);
+        Sort sort = Sort.by(Sort.Order.desc("createdAt"));
 
-        for(RecipeLike recipeLike : recipeLikes){
-            RecipeResponseDto recipeResponseDto = RecipeResponseDto.builder()
-                    .recipeId(recipeLike.getRecipe().getId())
-                    .name(recipeLike.getRecipe().getName())
-                    .build();
-            recipeListReponseDtos.add(recipeResponseDto);
-        }
-        return new RecipeListReponseDto(recipeListReponseDtos);
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<RecipeLike> recipeLikes = this.recipeLikeRepository.findAllByUser(user, pageable);
+        List<Recipe> recipes = recipeLikes.stream().map(like -> like.getRecipe()).collect(Collectors.toList());
+        Page<Recipe> recipePage = new PageImpl<>(recipes);
+        RecipeListDto recipeListDto = RecipeListDto.mapping(recipePage);
+
+        return recipeListDto;
     }
 }

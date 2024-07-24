@@ -7,7 +7,7 @@ import com.hackathonteam1.refreshrator.dto.ResponseDto;
 import com.hackathonteam1.refreshrator.dto.request.auth.LoginDto;
 import com.hackathonteam1.refreshrator.dto.request.auth.SigninDto;
 import com.hackathonteam1.refreshrator.dto.response.auth.TokenResponseDto;
-import com.hackathonteam1.refreshrator.dto.response.recipe.RecipeListReponseDto;
+import com.hackathonteam1.refreshrator.dto.response.recipe.RecipeListDto;
 import com.hackathonteam1.refreshrator.entity.User;
 import com.hackathonteam1.refreshrator.service.AuthService;
 import jakarta.servlet.http.HttpServletResponse;
@@ -86,8 +86,10 @@ public class AuthController {
 
     // 좋아요 누른 레시피 목록 조회
     @GetMapping("/likes")
-    public ResponseEntity<ResponseDto<RecipeListReponseDto>> showAllRecipeLikes(@AuthenticatedUser User user) {
-        RecipeListReponseDto recipeListReponseDto = authService.showAllRecipeLikes(user);
-        return new ResponseEntity<>(ResponseDto.res(HttpStatus.OK, "좋아요 누른 레시피 목록 조회 성공", recipeListReponseDto), HttpStatus.OK);
+    public ResponseEntity<ResponseDto<RecipeListDto>> showAllRecipeLikes(@AuthenticatedUser User user,
+                                                                         @RequestParam(name = "page", defaultValue = "0")int page,
+                                                                         @RequestParam(name = "size", defaultValue = "10")int size) {
+        RecipeListDto recipeListDto = authService.showAllRecipeLikes(user, page, size);
+        return new ResponseEntity<>(ResponseDto.res(HttpStatus.OK, "좋아요 누른 레시피 목록 조회 성공", recipeListDto), HttpStatus.OK);
     }
 }
