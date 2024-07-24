@@ -5,12 +5,16 @@ import com.hackathonteam1.refreshrator.dto.request.recipe.RegisterIngredientReci
 import com.hackathonteam1.refreshrator.dto.request.recipe.ModifyRecipeDto;
 import com.hackathonteam1.refreshrator.dto.request.recipe.RegisterRecipeDto;
 import com.hackathonteam1.refreshrator.dto.response.recipe.DetailRecipeDto;
+import com.hackathonteam1.refreshrator.dto.response.recipe.RecipeListDto;
 import com.hackathonteam1.refreshrator.entity.Recipe;
 import com.hackathonteam1.refreshrator.entity.User;
 
 import java.util.UUID;
 
 public interface RecipeService {
+
+    //레시피 목록 조회
+    public RecipeListDto getList(String keyword, String type, int page, int size);
 
     //레시피 등록
     public void register(RegisterRecipeDto registerRecipeDto, User user);
