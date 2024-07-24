@@ -9,15 +9,24 @@ import com.hackathonteam1.refreshrator.dto.response.recipe.DetailRecipeDto;
 import com.hackathonteam1.refreshrator.entity.*;
 
 import com.hackathonteam1.refreshrator.dto.response.recipe.RecipeListDto;
+
 import com.hackathonteam1.refreshrator.entity.Ingredient;
 import com.hackathonteam1.refreshrator.entity.IngredientRecipe;
 import com.hackathonteam1.refreshrator.entity.Recipe;
 import com.hackathonteam1.refreshrator.entity.User;
+import com.hackathonteam1.refreshrator.entity.Fridge;
+import com.hackathonteam1.refreshrator.entity.FrdigeItem;
+import com.hackathonteam1.refreshrator.entity.Image;
 
 import com.hackathonteam1.refreshrator.exception.*;
 
 import com.hackathonteam1.refreshrator.exception.errorcode.ErrorCode;
 import com.hackathonteam1.refreshrator.repository.*;
+import com.hackathonteam1.refreshrator.repository.FridgeRepository;
+import com.hackathonteam1.refreshrator.repository.ImageRepository;
+import com.hackathonteam1.refreshrator.repository.IngredientRecipeRepository;
+import com.hackathonteam1.refreshrator.repository.IngredientRepository;
+import com.hackathonteam1.refreshrator.repository.RecipeRepository;
 import com.hackathonteam1.refreshrator.util.S3Uploader;
 import lombok.RequiredArgsConstructor;
 
@@ -47,6 +56,7 @@ public class RecipeServiceImpl implements RecipeService{
     private final RecipeRepository recipeRepository;
     private final IngredientRepository ingredientRepository;
     private final IngredientRecipeRepository ingredientRecipeRepository;
+    private final FridgeRepository fridgeRepository;
     private final S3Uploader s3Uploader;
     private final ImageRepository imageRepository;
     private final RecipeLikeRepository recipeLikeRepository;
@@ -166,6 +176,28 @@ public class RecipeServiceImpl implements RecipeService{
     }
 
     @Override
+    public RecipeListDto getRecommendation(int page, int size, int match, String type, User user) {
+        Set<FridgeItem> userFridgeItems = findFridgeByUser(user).getFridgeItem().stream()
+                .filter(fridgeItem -> !fridgeItem.isExpired())
+                .collect(Collectors.toSet());
+
+        Set<Ingredient> usersIngredients = userFridgeItems.stream().map(i -> i.getIngredient()).collect(Collectors.toSet());
+
+        Sort sort;
+        if (type.equals("popularity")){
+            sort = Sort.by(Sort.Order.desc("likeCount"));
+        }else{
+            sort = Sort.by(Sort.Order.desc("createdAt"));
+        }
+
+        Pageable pageable = PageRequest.of(page,size,sort);
+
+        Page<Recipe> resultPages = recipeRepository.findAllByIngredientRecipesContain(usersIngredients, match, pageable);
+        RecipeListDto recipeListDto = RecipeListDto.mapping(resultPages);
+        return recipeListDto;
+    }
+
+    @Override
     public ImageDto registerImage(MultipartFile file) {
 
         if(!file.getContentType().equals(MediaType.IMAGE_GIF_VALUE) &&
@@ -203,6 +235,10 @@ public class RecipeServiceImpl implements RecipeService{
         recipe.deleteImage();
         s3Uploader.removeS3File(image.getUrl().split("/")[3]);
         imageRepository.delete(image);
+    }
+  
+    private Fridge findFridgeByUser(User user){
+        return fridgeRepository.findByUser(user).orElseThrow(()-> new NotFoundException(ErrorCode.FRIDGE_NOT_FOUND));
     }
 
     private Image findImageByImageId(UUID imageId){
