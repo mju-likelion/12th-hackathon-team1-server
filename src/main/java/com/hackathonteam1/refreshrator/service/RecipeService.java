@@ -53,5 +53,7 @@ public interface RecipeService {
     //파일(이미지) 삭제
     public void deleteImage(UUID imageId, User user);
 
+//    자신이 작성한 레시피 조회
+    public RecipeListDto findMyRecipes(User user, String type, int page, int size);
 
 }
