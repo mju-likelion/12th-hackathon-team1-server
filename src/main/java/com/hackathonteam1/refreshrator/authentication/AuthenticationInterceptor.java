@@ -30,6 +30,9 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
         if(request.getMethod().equals("OPTIONS")){
             return true;
         }
+        if(request.getMethod().equals("GET") && (request.getRequestURI().equals("/recipes") || request.getRequestURI().matches("^/recipes/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"))){
+            return true;
+        }
         String accessToken = AuthenticationExtractor.extract(request);
         UUID userId = UUID.fromString(jwtTokenProvider.getPayload(accessToken));
         User user = findExistingUser(userId);
