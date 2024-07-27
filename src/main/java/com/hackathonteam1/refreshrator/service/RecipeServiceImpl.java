@@ -248,7 +248,26 @@ public class RecipeServiceImpl implements RecipeService{
         s3Uploader.removeS3File(image.getUrl().split("/")[3]);
         imageRepository.delete(image);
     }
-  
+
+    @Override
+    public RecipeListDto findMyRecipes(User user, String type, int page, int size) {
+
+        Sort sort;
+        if (type.equals("popularity")){
+            sort = Sort.by(Sort.Order.desc("likeCount"));
+        }else{
+            sort = Sort.by(Sort.Order.desc("createdAt"));
+        }
+
+        Pageable pageable = PageRequest.of(page,size, sort);
+        Page<Recipe> recipePage = recipeRepository.findAllByUser(user, pageable);
+        checkValidPage(recipePage, page);
+
+        RecipeListDto recipeListDto = RecipeListDto.mapping(recipePage);
+
+        return recipeListDto;
+    }
+
     private Fridge findFridgeByUser(User user){
         return fridgeRepository.findByUser(user).orElseThrow(()-> new NotFoundException(ErrorCode.FRIDGE_NOT_FOUND));
     }
