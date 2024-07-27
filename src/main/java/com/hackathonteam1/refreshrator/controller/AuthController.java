@@ -10,6 +10,7 @@ import com.hackathonteam1.refreshrator.dto.response.auth.TokenResponseDto;
 import com.hackathonteam1.refreshrator.dto.response.recipe.RecipeListDto;
 import com.hackathonteam1.refreshrator.entity.User;
 import com.hackathonteam1.refreshrator.service.AuthService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -49,6 +50,15 @@ public class AuthController {
                 .build();
         response.addHeader("set-cookie", cookie.toString());
 
+        ResponseCookie cookie_refresh = ResponseCookie.from("RefreshToken",null)
+                .maxAge(0)
+                .path("/auth/refresh")
+                .httpOnly(true)
+                .sameSite("None")
+                .secure(true)
+                .build();
+        response.addHeader("set-cookie", cookie_refresh.toString());
+
         return new ResponseEntity<>(ResponseDto.res(HttpStatus.OK, "회원 탈퇴 완료"), HttpStatus.OK);
     }
 
@@ -67,6 +77,16 @@ public class AuthController {
                 .build();
         response.addHeader("set-cookie", cookie.toString());
 
+        ResponseCookie cookie_refresh = ResponseCookie.from("RefreshToken",tokenResponseDto.getRefreshToken().getTokenId().toString())
+                .maxAge(Duration.ofDays(14))
+                .path("/auth/refresh")
+                .httpOnly(true)
+                .sameSite("None")
+                .secure(true)
+                .build();
+
+        response.addHeader("set-cookie", cookie_refresh.toString());
+
         return new ResponseEntity<>(ResponseDto.res(HttpStatus.OK, "로그인 완료"), HttpStatus.OK);
     }
 
@@ -81,6 +101,15 @@ public class AuthController {
                 .build();
         response.addHeader("set-cookie", cookie.toString());
 
+        ResponseCookie cookie_refresh = ResponseCookie.from("RefreshToken",null)
+                .maxAge(0)
+                .path("/auth/refresh")
+                .httpOnly(true)
+                .sameSite("None")
+                .secure(true)
+                .build();
+        response.addHeader("set-cookie", cookie_refresh.toString());
+
         return new ResponseEntity<>(ResponseDto.res(HttpStatus.OK, "로그아웃 완료"), HttpStatus.OK);
     }
 
@@ -91,5 +120,30 @@ public class AuthController {
                                                                          @RequestParam(name = "size", defaultValue = "10")int size) {
         RecipeListDto recipeListDto = authService.showAllRecipeLikes(user, page, size);
         return new ResponseEntity<>(ResponseDto.res(HttpStatus.OK, "좋아요 누른 레시피 목록 조회 성공", recipeListDto), HttpStatus.OK);
+    }
+
+    @GetMapping("/refresh")
+    public ResponseEntity<ResponseDto<Void>> refresh(HttpServletRequest request, HttpServletResponse response){
+        TokenResponseDto tokenResponseDto = authService.refresh(request);
+        String bearerToken = JwtEncoder.encodeJwtToken(tokenResponseDto.getAccessToken());
+
+        ResponseCookie cookie_access = ResponseCookie.from(AuthenticationExtractor.TOKEN_COOKIE_NAME, bearerToken)
+                .maxAge(Duration.ofMillis(1800000))
+                .path("/")
+                .httpOnly(true)
+                .sameSite("None").secure(true)
+                .build();
+
+        ResponseCookie cookie_refresh = ResponseCookie.from("RefreshToken", tokenResponseDto.getRefreshToken().getTokenId().toString())
+                .maxAge(Duration.ofDays(14))
+                .path("/auth/refresh")
+                .httpOnly(true)
+                .sameSite("None")
+                .secure(true)
+                .build();
+
+        response.addHeader("set-cookie", cookie_access.toString());
+        response.addHeader("set-cookie", cookie_refresh.toString());
+        return new ResponseEntity<>(ResponseDto.res(HttpStatus.OK, "토큰 재발급 성공"), HttpStatus.OK);
     }
 }
