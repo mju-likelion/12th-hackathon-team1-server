@@ -1,5 +1,6 @@
 package com.hackathonteam1.refreshrator.service;
 
+import com.hackathonteam1.refreshrator.authentication.JwtEncoder;
 import com.hackathonteam1.refreshrator.authentication.JwtTokenProvider;
 import com.hackathonteam1.refreshrator.authentication.PasswordHashEncryption;
 import com.hackathonteam1.refreshrator.dto.request.auth.LoginDto;
@@ -7,33 +8,44 @@ import com.hackathonteam1.refreshrator.dto.request.auth.SigninDto;
 import com.hackathonteam1.refreshrator.dto.response.auth.TokenResponseDto;
 import com.hackathonteam1.refreshrator.dto.response.recipe.RecipeDto;
 import com.hackathonteam1.refreshrator.dto.response.recipe.RecipeListDto;
-import com.hackathonteam1.refreshrator.entity.Fridge;
-import com.hackathonteam1.refreshrator.entity.Recipe;
-import com.hackathonteam1.refreshrator.entity.RecipeLike;
-import com.hackathonteam1.refreshrator.entity.User;
+import com.hackathonteam1.refreshrator.entity.*;
 import com.hackathonteam1.refreshrator.exception.ConflictException;
 import com.hackathonteam1.refreshrator.exception.ForbiddenException;
 import com.hackathonteam1.refreshrator.exception.NotFoundException;
+import com.hackathonteam1.refreshrator.exception.UnauthorizedException;
 import com.hackathonteam1.refreshrator.exception.errorcode.ErrorCode;
 import com.hackathonteam1.refreshrator.repository.FridgeRepository;
 import com.hackathonteam1.refreshrator.repository.RecipeLikeRepository;
 import com.hackathonteam1.refreshrator.repository.UserRepository;
+import com.hackathonteam1.refreshrator.util.RedisUtil;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class AuthService {
     private final UserRepository userRepository;
     private final FridgeRepository fridgeRepository;
     private final PasswordHashEncryption passwordHashEncryption;
     private final JwtTokenProvider jwtTokenProvider;
     private final RecipeLikeRepository recipeLikeRepository;
+
+    private final RedisUtil<String, RefreshToken> redisUtilForRefreshToken;
+    private final RedisUtil<String, String> redisUtilForUserId;
+
+    private final static int TIMEOUT = 14;
+    private final static TimeUnit TIME_UNIT = TimeUnit.DAYS;
+
 
     //회원가입
     public void signin(SigninDto signinDto){
@@ -88,7 +100,23 @@ public class AuthService {
         String payload = String.valueOf(user.getId());
         String accessToken = jwtTokenProvider.createToken(payload);
 
-        return new TokenResponseDto(accessToken);
+        //기존에 refreshToken이 있었는지 확인 후 삭제
+        Optional<String> refreshTokenId = redisUtilForUserId.findById(user.getId().toString());
+        if(refreshTokenId.isPresent()){
+            redisUtilForRefreshToken.delete(refreshTokenId.get());
+            redisUtilForUserId.delete(user.getId().toString());
+        }
+
+        UUID newRefreshTokenId = UUID.randomUUID();
+        RefreshToken refreshToken = RefreshToken.builder()
+                .tokenId(newRefreshTokenId)
+                .userId(user.getId())
+                .build();
+
+        redisUtilForRefreshToken.save(newRefreshTokenId.toString(), refreshToken, TIMEOUT, TIME_UNIT);
+        redisUtilForUserId.save(user.getId().toString(), newRefreshTokenId.toString(),TIMEOUT,TIME_UNIT);
+
+        return new TokenResponseDto(accessToken, refreshToken);
     }
 
     // 좋아요 누른 레시피 목록 조회
@@ -107,6 +135,44 @@ public class AuthService {
 
         RecipeListDto recipeListDto = RecipeListDto.mapping(recipePage);
         return recipeListDto;
+    }
+
+    @Transactional
+    public TokenResponseDto refresh(HttpServletRequest request){
+
+        Cookie[] cookies = request.getCookies();
+
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (cookie.getName().equals("RefreshToken")) {
+                    RefreshToken refreshToken = findRefreshTokenByRefreshTokenId(UUID.fromString(cookie.getValue()));
+                    UUID userId = refreshToken.getUserId();
+                    String accessToken = jwtTokenProvider.createToken(userId.toString());
+
+                    //refreshToken Rotation을 위해 매번 재발급.
+                    redisUtilForRefreshToken.delete(refreshToken.getTokenId().toString());
+                    redisUtilForUserId.delete(userId.toString());
+
+                    UUID newRefreshTokenId = UUID.randomUUID();
+
+                    RefreshToken newRefreshToken = RefreshToken.builder()
+                            .tokenId(newRefreshTokenId)
+                            .userId(userId)
+                            .build();
+
+                    redisUtilForRefreshToken.save(newRefreshTokenId.toString(), newRefreshToken, TIMEOUT, TIME_UNIT);
+                    redisUtilForUserId.save(userId.toString(), newRefreshTokenId.toString(),TIMEOUT,TIME_UNIT);
+
+                    return new TokenResponseDto(accessToken, newRefreshToken);
+                }
+            }
+        }
+        throw new UnauthorizedException(ErrorCode.COOKIE_NOT_FOUND, "RefreshToken이 존재하지 않습니다.");
+    }
+
+    private RefreshToken findRefreshTokenByRefreshTokenId(UUID tokenId){
+        return redisUtilForRefreshToken.findById(tokenId.toString()).orElseThrow( () ->
+                new UnauthorizedException(ErrorCode.INVALID_TOKEN));
     }
 
     private <T> void checkValidPage(Page<T> pages, int page){
