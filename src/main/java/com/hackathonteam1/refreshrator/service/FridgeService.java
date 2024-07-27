@@ -101,6 +101,7 @@ public class FridgeService {
                     .id(fridgeItem.getId())
                     .ingredientId(fridgeItem.getIngredient().getId())
                     .ingredientName(fridgeItem.getIngredient().getName())
+                    .expirationDate(fridgeItem.getExpiredDate())
                     .build();
 
             if(LocalDate.now().isAfter(fridgeItem.getExpiredDate())){
