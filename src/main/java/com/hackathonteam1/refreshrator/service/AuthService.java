@@ -172,7 +172,7 @@ public class AuthService {
 
     private RefreshToken findRefreshTokenByRefreshTokenId(UUID tokenId){
         return redisUtilForRefreshToken.findById(tokenId.toString()).orElseThrow( () ->
-                new UnauthorizedException(ErrorCode.INVALID_TOKEN));
+                new UnauthorizedException(ErrorCode.INVALID_TOKEN, "유효하지 않은 RefreshToken입니다."));
     }
 
     private <T> void checkValidPage(Page<T> pages, int page){
