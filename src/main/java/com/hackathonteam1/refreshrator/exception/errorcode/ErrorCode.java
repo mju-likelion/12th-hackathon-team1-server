@@ -47,7 +47,8 @@ public enum ErrorCode {
     RECIPE_IMAGE_CONFLICT("4093", "레시피에 이미지가 이미 존재합니다."),
 
     //InternetException
-    FILE_STORAGE_ERROR("5000", "파일을 업로드할 수 없습니다.");
+    FILE_STORAGE_ERROR("5000", "파일을 업로드할 수 없습니다."),
+    REDIS_ERROR("5001", "Redis에서 오류가 발생했습니다.");
 
     private final String code;
     private final String message;

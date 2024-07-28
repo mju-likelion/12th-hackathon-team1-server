@@ -63,5 +63,6 @@ jobs: # 실행할 작업들에 대한 설정
             sudo docker pull ${{secrets.DOCKERHUB_USERNAME}}/${{secrets.DOCKERHUB_IMAGE}}
             sudo docker ps -q | xargs -r sudo docker stop
             sudo docker ps -aq | xargs -r sudo docker rm
+            sudo docker run --name redis --rm -d -p 6379:6379 redis
             sudo docker run --name ${{secrets.DOCKERHUB_IMAGE}} --rm -d -p 8080:8080 ${{secrets.DOCKERHUB_USERNAME}}/${{secrets.DOCKERHUB_IMAGE}}
             sudo docker system prune -f
