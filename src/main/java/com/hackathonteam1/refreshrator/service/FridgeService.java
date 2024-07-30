@@ -15,6 +15,8 @@ import com.hackathonteam1.refreshrator.repository.FridgeItemRepository;
 import com.hackathonteam1.refreshrator.repository.FridgeRepository;
 import com.hackathonteam1.refreshrator.repository.IngredientRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -30,6 +32,7 @@ public class FridgeService {
     private FridgeRepository fridgeRepository;
 
     //냉장고에 재료 추가
+    @CacheEvict(value = "userIngredientsCache", key = "#user.getId()", cacheManager = "redisCacheManager")
     public void addIngredientInFridge(AddFridgeDto addFridgeDto, User user){
 
         //재료 찾기
@@ -53,6 +56,7 @@ public class FridgeService {
     }
 
     //냉장고에 재료 정보 수정 메서드
+    @CacheEvict(value = "userIngredientsCache", key = "#user.getId()", cacheManager = "redisCacheManager")
     public void updateIngredientInFridge(UUID fridgeItemId, AddFridgeDto addFridgeDto, User user){
 
         //수정할 재료 찾기
@@ -72,6 +76,7 @@ public class FridgeService {
     }
 
     //냉장고에 재료 삭제 메서드
+    @CacheEvict(value = "userIngredientsCache", key = "#user.getId()", cacheManager = "redisCacheManager")
     public void deleteIngredientInFridge(UUID fridgeItemId, User user){
         //삭제할 재료 찾기
         FridgeItem fridgeItem=findFridgeItem(fridgeItemId);
@@ -84,6 +89,7 @@ public class FridgeService {
     }
 
     // 냉장고에 모든 재료 조회
+    @Cacheable(value = "userIngredientsCache",key = "#user.getId()", cacheManager = "redisCacheManager")
     public FridgeItemListDto getIngredientsInFridge(User user) {
         // 유저의 냉장고 찾기
         Fridge fridge = findFridge(user);
