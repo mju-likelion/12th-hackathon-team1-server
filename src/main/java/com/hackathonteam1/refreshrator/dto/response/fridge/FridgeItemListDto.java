@@ -1,14 +1,14 @@
 package com.hackathonteam1.refreshrator.dto.response.fridge;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
+import lombok.*;
 
 import java.util.List;
 
 @Getter
 @Builder
 @AllArgsConstructor
+@Setter
+@NoArgsConstructor
 public class FridgeItemListDto {
     private List<FridgeItemDto> coldStorage; // 냉장
     private List<FridgeItemDto> frozen; // 냉동

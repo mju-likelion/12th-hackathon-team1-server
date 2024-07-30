@@ -3,12 +3,14 @@ package com.hackathonteam1.refreshrator.dto.request.fridge;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.util.UUID;
 
 @Getter
 @AllArgsConstructor
+@NoArgsConstructor
 public class AddFridgeDto {
 
     //재료
