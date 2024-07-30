@@ -29,6 +29,10 @@ import com.hackathonteam1.refreshrator.repository.RecipeRepository;
 import com.hackathonteam1.refreshrator.util.S3Uploader;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.http.MediaType;
 
 import org.springframework.data.domain.Page;
@@ -61,6 +65,7 @@ public class RecipeServiceImpl implements RecipeService{
     private final RecipeLikeRepository recipeLikeRepository;
 
     @Override
+    @Cacheable(value = "recipeListCache",key = "#keyword + '-' + #type + '-' + #page + '-' + #size", cacheManager = "redisCacheManager")
     public RecipeListDto getList(String keyword, String type, int page, int size) {
 
         Sort sort;
@@ -85,6 +90,7 @@ public class RecipeServiceImpl implements RecipeService{
 
     @Override
     @Transactional
+    @CacheEvict(value = "recipeListCache", allEntries = true, cacheManager = "redisCacheManager")
     public void register(RegisterRecipeDto registerRecipeDto, User user) {
         Image image = null;
 
@@ -106,6 +112,7 @@ public class RecipeServiceImpl implements RecipeService{
 
     //상세조회
     @Override
+    @Cacheable(value = "recipeDetailCache", key = "#recipeId", cacheManager = "redisCacheManager")
     public DetailRecipeDto getDetail(UUID recipeId) {
         Recipe recipe = findRecipeByRecipeId(recipeId);
         List<IngredientRecipe> ingredientRecipes = findAllIngredientRecipeByRecipe(recipe);
@@ -116,6 +123,12 @@ public class RecipeServiceImpl implements RecipeService{
 
     //레시피명, 조리법 수정
     @Override
+    @Caching(
+            evict = {
+                    @CacheEvict(value = "recipeListCache", allEntries = true, cacheManager = "redisCacheManager"),
+                    @CacheEvict(value = "recipeDetailCache", key = "#recipeId", cacheManager = "redisCacheManager")
+            }
+    )
     public void modifyContent(ModifyRecipeDto modifyRecipeDto, User user, UUID recipeId) {
         Recipe recipe = findRecipeByRecipeId(recipeId);
         checkAuth(recipe.getUser(), user);
@@ -137,6 +150,12 @@ public class RecipeServiceImpl implements RecipeService{
 
     //레시피 삭제
     @Override
+    @Caching(
+            evict = {
+                    @CacheEvict(value = "recipeListCache", allEntries = true, cacheManager = "redisCacheManager"),
+                    @CacheEvict(value = "recipeDetailCache", key = "#recipeId", cacheManager = "redisCacheManager")
+            }
+    )
     public void delete(UUID recipeId, User user) {
         Recipe recipe = findRecipeByRecipeId(recipeId);
         checkAuth(recipe.getUser(), user);
@@ -146,6 +165,7 @@ public class RecipeServiceImpl implements RecipeService{
     //레시피 재료 등록
     @Override
     @Transactional
+    @CacheEvict(value = "recipeDetailCache", key = "#recipeId", cacheManager = "redisCacheManager")
     public void registerIngredientRecipe(User user, UUID recipeId, RegisterIngredientRecipesDto registerIngredientRecipesDto) {
         Recipe recipe = findRecipeByRecipeId(recipeId);
         checkAuth(recipe.getUser(), user);
@@ -168,6 +188,7 @@ public class RecipeServiceImpl implements RecipeService{
     }
 
     @Override
+    @CacheEvict(value = "recipeDetailCache", key = "#recipeId", cacheManager = "redisCacheManager")
     public void deleteIngredientRecipe(User user, UUID recipeId, DeleteIngredientRecipesDto deleteIngredientRecipesDto) {
         Recipe recipe = findRecipeByRecipeId(recipeId);
         checkAuth(recipe.getUser(),user);
@@ -235,9 +256,15 @@ public class RecipeServiceImpl implements RecipeService{
     }
 
     @Override
+    @Caching(
+            evict = {
+                    @CacheEvict(value = "recipeListCache", allEntries = true, cacheManager = "redisCacheManager"),
+            }
+    )
     public void deleteImage(UUID imageId, User user) {
         Image image = findImageByImageId(imageId);
         Recipe recipe = image.getRecipe();
+        UUID recipeId = recipe.getId();
 
         if(!recipe.isContainingImage()){
             throw new BadRequestException(ErrorCode.IMAGE_NOT_IN_RECIPE);
@@ -291,6 +318,12 @@ public class RecipeServiceImpl implements RecipeService{
 
     // 레시피에 좋아요 추가
     @Override
+    @Caching(
+            evict = {
+                    @CacheEvict(value = "recipeListCache", allEntries = true, cacheManager = "redisCacheManager"),
+                    @CacheEvict(value = "recipeDetailCache", key = "#recipeId", cacheManager = "redisCacheManager")
+            }
+    )
     public void addLikeToRecipe(User user, UUID recipeId){
         Recipe recipe = findRecipeByRecipeId(recipeId);
 
@@ -305,6 +338,12 @@ public class RecipeServiceImpl implements RecipeService{
 
     // 레시피에 좋아요 삭제
     @Override
+    @Caching(
+            evict = {
+                    @CacheEvict(value = "recipeListCache", allEntries = true, cacheManager = "redisCacheManager"),
+                    @CacheEvict(value = "recipeDetailCache", key = "#recipeId", cacheManager = "redisCacheManager")
+            }
+    )
     public void deleteLikeFromRecipe(User user, UUID recipeId){
         Recipe recipe = findRecipeByRecipeId(recipeId);
         // 해당 레시피에서 내가 누른 좋아요 반환
