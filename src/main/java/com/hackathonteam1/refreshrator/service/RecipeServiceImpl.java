@@ -42,10 +42,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -140,6 +137,10 @@ public class RecipeServiceImpl implements RecipeService{
     public void delete(UUID recipeId, User user) {
         Recipe recipe = findRecipeByRecipeId(recipeId);
         checkAuth(recipe.getUser(), user);
+        if(recipe.isContainingImage()){
+            Image image = findImageByRecipe(recipe);
+            s3Uploader.removeS3File(image.getUrl().split("/")[3]);
+        }
         recipeRepository.delete(recipe);
     }
 
@@ -357,5 +358,9 @@ public class RecipeServiceImpl implements RecipeService{
         if(pages.getTotalPages() <= page && page != 0){
             throw new NotFoundException(ErrorCode.PAGE_NOT_FOUND);
         }
+    }
+
+    private Image findImageByRecipe(Recipe recipe){
+        return imageRepository.findByRecipe(recipe).orElseThrow(()->new NotFoundException(ErrorCode.IMAGE_NOT_FOUND));
     }
 }
