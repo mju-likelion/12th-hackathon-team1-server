@@ -42,10 +42,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -59,6 +56,8 @@ public class RecipeServiceImpl implements RecipeService{
     private final S3Uploader s3Uploader;
     private final ImageRepository imageRepository;
     private final RecipeLikeRepository recipeLikeRepository;
+
+    private static final List<String> IMAGE_EXTENSION = Arrays.asList(".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".tiff", ".svg", ".heic");
 
     @Override
     public RecipeListDto getList(String keyword, String type, int page, int size) {
@@ -92,6 +91,12 @@ public class RecipeServiceImpl implements RecipeService{
             image = findImageByImageId(registerRecipeDto.getImageId());
         }
 
+        //동일한 재료를 요청할 경우 예외처리
+        Set<UUID> ingredientIdSet = new HashSet<>(registerRecipeDto.getIngredientIds());
+        if(ingredientIdSet.size() != registerRecipeDto.getIngredientIds().size()){
+            throw new BadRequestException(ErrorCode.DUPLICATED_RECIPE_INGREDIENT);
+        }
+
         Recipe recipe = Recipe.builder()
                 .name(registerRecipeDto.getName())
                 .cookingStep(registerRecipeDto.getCookingStep())
@@ -101,7 +106,7 @@ public class RecipeServiceImpl implements RecipeService{
 
         recipeRepository.save(recipe);
 
-        registerRecipeDto.getIngredientIds().stream().forEach(i -> registerRecipeIngredient(findIngredientByIngredientId(i),recipe));
+        ingredientIdSet.stream().forEach(i -> registerRecipeIngredient(findIngredientByIngredientId(i),recipe));
     }
 
     //상세조회
@@ -212,11 +217,10 @@ public class RecipeServiceImpl implements RecipeService{
     @Override
     public ImageDto registerImage(MultipartFile file) {
 
-        if(!file.getContentType().equals(MediaType.IMAGE_GIF_VALUE) &&
-                !file.getContentType().equals(MediaType.IMAGE_PNG_VALUE) &&
-                !file.getContentType().equals(MediaType.IMAGE_JPEG_VALUE) ){
+        String fileName = file.getOriginalFilename();
+        if(!IMAGE_EXTENSION.stream().anyMatch(i-> fileName.endsWith(i))){
             throw new FileStorageException(ErrorCode.FILE_TYPE_ERROR);
-        }
+        };
 
         String url;
         try {
