@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 public class DetailRecipeDto {
     private UUID id;
     private String name;
+    private String writer;
     private List<IngredientRecipeResponseDto> ingredientRecipes;
     private String cookingStep;
     private int likeCount;
@@ -29,7 +30,7 @@ public class DetailRecipeDto {
     public static DetailRecipeDto mapping(Recipe recipe, List<IngredientRecipe> ingredientRecipes){
         List<IngredientRecipeResponseDto> ingredientDtos = ingredientRecipes.stream().map(
                 i->IngredientRecipeResponseDto.changeToDto(i)).collect(Collectors.toList());
-        return new DetailRecipeDto(recipe.getId(), recipe.getName(), ingredientDtos,
+        return new DetailRecipeDto(recipe.getId(), recipe.getName(), recipe.getUser().getName(), ingredientDtos,
                 recipe.getCookingStep(), recipe.getLikeCount(), ImageDto.mapping(recipe.getImage()),
                 recipe.getCreatedAt(), recipe.getUpdatedAt());
     }
