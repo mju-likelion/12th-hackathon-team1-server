@@ -9,6 +9,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -19,4 +21,6 @@ public interface RecipeRepository extends JpaRepository<Recipe, UUID> {
     Page<Recipe> findAllByIngredientRecipesContain(@Param("ingredients") Set<Ingredient> ingredients, @Param("match") int match, Pageable pageable);
     Page<Recipe> findAll(Pageable pageable);
     Page<Recipe> findAllByUser(User user, Pageable pageable);
+
+    Optional<List<Recipe>> findAllByUser(User user);
 }

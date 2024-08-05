@@ -6,6 +6,8 @@ import io.micrometer.common.lang.Nullable;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Formula;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.util.List;
 
@@ -24,6 +26,7 @@ public class Recipe extends BaseEntity{
     private String cookingStep;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id")
     private User user;
 
     @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
@@ -35,6 +38,7 @@ public class Recipe extends BaseEntity{
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "image_id")
     @Nullable
+    @OnDelete(action =  OnDeleteAction.SET_NULL)
     private Image image;
 
     @Formula("(select count(rl.id) from recipe_like rl where rl.recipe_id = id)")
