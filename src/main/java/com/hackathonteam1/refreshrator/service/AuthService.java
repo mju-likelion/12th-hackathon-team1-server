@@ -14,10 +14,9 @@ import com.hackathonteam1.refreshrator.exception.ForbiddenException;
 import com.hackathonteam1.refreshrator.exception.NotFoundException;
 import com.hackathonteam1.refreshrator.exception.UnauthorizedException;
 import com.hackathonteam1.refreshrator.exception.errorcode.ErrorCode;
-import com.hackathonteam1.refreshrator.repository.FridgeRepository;
-import com.hackathonteam1.refreshrator.repository.RecipeLikeRepository;
-import com.hackathonteam1.refreshrator.repository.UserRepository;
+import com.hackathonteam1.refreshrator.repository.*;
 import com.hackathonteam1.refreshrator.util.RedisUtil;
+import com.hackathonteam1.refreshrator.util.S3Uploader;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
@@ -39,6 +38,9 @@ public class AuthService {
     private final PasswordHashEncryption passwordHashEncryption;
     private final JwtTokenProvider jwtTokenProvider;
     private final RecipeLikeRepository recipeLikeRepository;
+    private final S3Uploader s3Uploader;
+    private final ImageRepository imageRepository;
+    private final RecipeRepository recipeRepository;
 
     private final RedisUtil<String, RefreshToken> redisUtilForRefreshToken;
     private final RedisUtil<String, String> redisUtilForUserId;
@@ -77,6 +79,17 @@ public class AuthService {
 
     //회원탈퇴
     public void leave(User user){
+        //레시피를 삭제하기 전, 유저의 레시피 내 이미지를 S3에서 모두 삭제
+        if(user.getRecipes()!=null){
+            List<Recipe> recipes = findAllRecipesByUser(user);
+
+            recipes.forEach(recipe-> {
+                if(recipe.isContainingImage()){
+                    Image image = findImageByRecipe(recipe);
+                    s3Uploader.removeS3File(image.getUrl().split("/")[3]);
+                }
+            });
+        }
         //탈퇴
         userRepository.delete(user);
     }
@@ -179,5 +192,13 @@ public class AuthService {
         if(pages.getTotalPages() <= page && page != 0){
             throw new NotFoundException(ErrorCode.PAGE_NOT_FOUND);
         }
+    }
+
+    private Image findImageByRecipe(Recipe recipe){
+        return imageRepository.findByRecipe(recipe).orElseThrow(()->new NotFoundException(ErrorCode.IMAGE_NOT_FOUND));
+    }
+
+    private List<Recipe> findAllRecipesByUser(User user){
+        return recipeRepository.findAllByUser(user).orElseThrow(()-> new NotFoundException(ErrorCode.RECIPE_NOT_FOUND));
     }
 }
