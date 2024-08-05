@@ -5,11 +5,15 @@ import com.hackathonteam1.refreshrator.entity.Ingredient;
 import com.hackathonteam1.refreshrator.entity.IngredientRecipe;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.UUID;
 
 @Getter
 @AllArgsConstructor
+@Setter
+@NoArgsConstructor
 public class IngredientRecipeResponseDto {
 
     private UUID id;

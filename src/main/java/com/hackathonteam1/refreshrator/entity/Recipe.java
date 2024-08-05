@@ -20,8 +20,7 @@ public class Recipe extends BaseEntity{
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false)
-    @Lob
+    @Column(nullable = false, length = 5000)
     private String cookingStep;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

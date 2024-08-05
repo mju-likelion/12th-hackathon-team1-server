@@ -1,13 +1,15 @@
 package com.hackathonteam1.refreshrator.dto.response.ingredient;
 
 import com.hackathonteam1.refreshrator.entity.Ingredient;
-import lombok.Builder;
-import lombok.Getter;
+import lombok.*;
 
 import java.util.UUID;
 
 @Builder
 @Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class IngredientDto {
 
     private UUID id;
