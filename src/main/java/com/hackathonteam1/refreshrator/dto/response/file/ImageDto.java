@@ -1,15 +1,15 @@
 package com.hackathonteam1.refreshrator.dto.response.file;
 
 import com.hackathonteam1.refreshrator.entity.Image;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
+import lombok.*;
 
 import java.util.UUID;
 
 @Getter
 @Builder
 @AllArgsConstructor
+@Setter
+@NoArgsConstructor
 public class ImageDto {
 
     private UUID id;

@@ -1,12 +1,15 @@
 package com.hackathonteam1.refreshrator.dto.response.recipe;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import com.hackathonteam1.refreshrator.dto.response.file.ImageDto;
 import com.hackathonteam1.refreshrator.entity.Image;
 import com.hackathonteam1.refreshrator.entity.IngredientRecipe;
 import com.hackathonteam1.refreshrator.entity.Recipe;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -16,6 +19,8 @@ import java.util.stream.Collectors;
 @Getter
 @Builder
 @AllArgsConstructor
+@Setter
+@NoArgsConstructor
 public class DetailRecipeDto {
     private UUID id;
     private String name;
@@ -23,7 +28,13 @@ public class DetailRecipeDto {
     private String cookingStep;
     private int likeCount;
     private ImageDto image;
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime createdAt;
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime updatedAt;
 
     public static DetailRecipeDto mapping(Recipe recipe, List<IngredientRecipe> ingredientRecipes){

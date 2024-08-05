@@ -2,9 +2,7 @@ package com.hackathonteam1.refreshrator.dto.response.recipe;
 
 import com.hackathonteam1.refreshrator.dto.response.PaginationDto;
 import com.hackathonteam1.refreshrator.entity.Recipe;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
+import lombok.*;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
@@ -13,6 +11,8 @@ import java.util.stream.Collectors;
 @Getter
 @AllArgsConstructor
 @Builder
+@NoArgsConstructor
+@Setter
 public class RecipeListDto {
     private List<RecipeDto> recipeList;
     private PaginationDto pagination;
