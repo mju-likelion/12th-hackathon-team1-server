@@ -357,6 +357,7 @@ public class RecipeServiceImpl implements RecipeService{
         // 해당 레시피에서 내가 누른 좋아요 반환
         RecipeLike recipeLike = this.findMyRecipeLike(user, recipe);
         recipe.getUser().getRecipeLikes().remove(recipeLike);
+        recipe.getRecipeLikes().remove(recipeLike);
         this.recipeLikeRepository.delete(recipeLike);
     }
 
