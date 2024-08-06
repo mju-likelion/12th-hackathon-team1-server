@@ -63,6 +63,18 @@ jobs: # 실행할 작업들에 대한 설정
             sudo docker pull ${{secrets.DOCKERHUB_USERNAME}}/${{secrets.DOCKERHUB_IMAGE}}
             sudo docker ps -q | xargs -r sudo docker stop
             sudo docker ps -aq | xargs -r sudo docker rm
-            sudo docker run --name redis --rm -d -p 6379:6379 --net my-network redis
-            sudo docker run --name ${{secrets.DOCKERHUB_IMAGE}} --rm -d --net my-network -p 8080:8080 ${{secrets.DOCKERHUB_USERNAME}}/${{secrets.DOCKERHUB_IMAGE}}
+            sudo docker run --name ${{secrets.DOCKERHUB_IMAGE}} --rm -d -p 8080:8080 ${{secrets.DOCKERHUB_USERNAME}}/${{secrets.DOCKERHUB_IMAGE}}
+
+      - name: ssh connect & production # EC2에 접속하여 도커 이미지 실행
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{secrets.HOST2}} # EC2 인스턴스의 IP 주소
+          username: ${{secrets.USERNAME}} # EC2 인스턴스의 사용자 이름 (ubuntu)
+          key: ${{secrets.PASSWORD}} # EC2 인스턴스의 비밀번호 (SSH 키)
+          script: | # 실행할 스크립트
+            sudo docker login --username ${{secrets.DOCKERHUB_USERNAME}} --password ${{secrets.DOCKERHUB_PASSWORD}}
+            sudo docker pull ${{secrets.DOCKERHUB_USERNAME}}/${{secrets.DOCKERHUB_IMAGE}}
+            sudo docker ps -q | xargs -r sudo docker stop
+            sudo docker ps -aq | xargs -r sudo docker rm
+            sudo docker run --name ${{secrets.DOCKERHUB_IMAGE}} --rm -d -p 8080:8080 ${{secrets.DOCKERHUB_USERNAME}}/${{secrets.DOCKERHUB_IMAGE}}
             sudo docker system prune -f
