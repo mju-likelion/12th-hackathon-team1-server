@@ -242,10 +242,7 @@ public class RecipeServiceImpl implements RecipeService{
     @Override
     public ImageDto registerImage(MultipartFile file) {
 
-        String fileName = file.getOriginalFilename();
-        if(!IMAGE_EXTENSION.stream().anyMatch(i-> fileName.endsWith(i))){
-            throw new FileStorageException(ErrorCode.FILE_TYPE_ERROR);
-        };
+        validateImageFile(file); //확장자를 통해 이미지 파일인지 확인
 
         String url;
         try {
@@ -409,5 +406,12 @@ public class RecipeServiceImpl implements RecipeService{
 
     private Image findImageByRecipe(Recipe recipe){
         return imageRepository.findByRecipe(recipe).orElseThrow(()->new NotFoundException(ErrorCode.IMAGE_NOT_FOUND));
+    }
+
+    private void validateImageFile(MultipartFile file){
+        String lowerFileName = file.getOriginalFilename().toLowerCase();
+        if(!IMAGE_EXTENSION.stream().anyMatch(i-> lowerFileName.endsWith(i))){
+            throw new FileStorageException(ErrorCode.FILE_TYPE_ERROR);
+        };
     }
 }
