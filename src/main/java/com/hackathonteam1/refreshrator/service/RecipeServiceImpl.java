@@ -93,10 +93,7 @@ public class RecipeServiceImpl implements RecipeService{
         }
 
         //동일한 재료를 요청할 경우 예외처리
-        Set<UUID> ingredientIdSet = new HashSet<>(registerRecipeDto.getIngredientIds());
-        if(ingredientIdSet.size() != registerRecipeDto.getIngredientIds().size()){
-            throw new BadRequestException(ErrorCode.DUPLICATED_RECIPE_INGREDIENT);
-        }
+        checkDuplicatedIngredient(registerRecipeDto.getIngredientIds());
 
         Recipe recipe = Recipe.builder()
                 .name(registerRecipeDto.getName())
@@ -107,7 +104,8 @@ public class RecipeServiceImpl implements RecipeService{
 
         recipeRepository.save(recipe);
 
-        ingredientIdSet.stream().forEach(i -> registerRecipeIngredient(findIngredientByIngredientId(i),recipe));
+        registerRecipeDto.getIngredientIds().stream().forEach(i ->
+                registerRecipeIngredient(findIngredientByIngredientId(i),recipe));
     }
 
     //상세조회
@@ -175,11 +173,13 @@ public class RecipeServiceImpl implements RecipeService{
         checkAuth(recipe.getUser(), user);
 
         //기존에 레시피에 존재하던 재료 리스트
-        List<Ingredient> ingredients = findAllIngredientByIngredientRecipes(findAllIngredientRecipeByRecipe(recipe));
+        List<Ingredient> existingIngredients = findAllIngredientByIngredientRecipes(findAllIngredientRecipeByRecipe(recipe));
 
-        HashSet<Ingredient> existingIngredients = new HashSet<>(ingredients);
+        List<UUID> requestedIngredientIds = registerIngredientRecipesDto.getIngredientIds();
+        //요청된 재료에 중복이 있는지 확인
+        checkDuplicatedIngredient(requestedIngredientIds);
 
-        List<Ingredient> newIngredients = registerIngredientRecipesDto.nonDupIngredientIds().stream().map(i->
+        List<Ingredient> newIngredients = requestedIngredientIds.stream().map(i->
                 findIngredientByIngredientId(i)).collect(Collectors.toList());
 
         //기존에 레시피에 존재하던 재료인지 확인 후 추가
@@ -199,10 +199,14 @@ public class RecipeServiceImpl implements RecipeService{
 
         //기존 레시피의 재료들
         List<IngredientRecipe> existingIngredientRecipes = findAllIngredientRecipeByRecipe(recipe);
-
+        //기존 레시피의 재료들의 Id를 파싱해서 가져옴
         Set<UUID> existingIngredientRecipeIds = existingIngredientRecipes.stream().map(i->i.getId()).collect(Collectors.toSet());
 
-        deleteIngredientRecipesDto.nonDupIngredientIds().forEach(i -> {
+        List<UUID>requestedIngredientIds = deleteIngredientRecipesDto.getIngredientRecipeIds();
+
+        checkDuplicatedIngredient(requestedIngredientIds);
+
+        requestedIngredientIds.forEach(i -> {
             if(!existingIngredientRecipeIds.contains(i)){
                 throw new NotFoundException(ErrorCode.INGREDIENT_RECIPE_NOT_FOUND);
             }
@@ -416,5 +420,12 @@ public class RecipeServiceImpl implements RecipeService{
             return Sort.by(Sort.Order.desc("likeCount"));
         }
         throw new BadRequestException(ErrorCode.SORT_TYPE_ERROR);
+    }
+
+    private void checkDuplicatedIngredient(List<UUID> ingredientIds){
+        Set<UUID> ingredientIdSet = new HashSet<>(ingredientIds);
+        if(ingredientIdSet.size() != ingredientIds.size()){
+            throw new BadRequestException(ErrorCode.DUPLICATED_RECIPE_INGREDIENT);
+        }
     }
 }
