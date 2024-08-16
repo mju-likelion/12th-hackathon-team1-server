@@ -67,12 +67,7 @@ public class RecipeServiceImpl implements RecipeService{
     @Cacheable(value = "recipeListCache",key = "#keyword + '-' + #type + '-' + #page + '-' + #size", cacheManager = "redisCacheManager")
     public RecipeListDto getList(String keyword, String type, int page, int size) {
 
-        Sort sort;
-        if (type.equals("newest")){
-            sort = Sort.by(Sort.Order.desc("createdAt"));
-        }else{
-            sort = Sort.by(Sort.Order.desc("likeCount"));
-        }
+        Sort sort = determineSortStrategy(type);
 
         Pageable pageable = PageRequest.of(page, size, sort);
 
@@ -224,12 +219,7 @@ public class RecipeServiceImpl implements RecipeService{
 
         Set<Ingredient> usersIngredients = userFridgeItems.stream().map(i -> i.getIngredient()).collect(Collectors.toSet());
 
-        Sort sort;
-        if (type.equals("popularity")){
-            sort = Sort.by(Sort.Order.desc("likeCount"));
-        }else{
-            sort = Sort.by(Sort.Order.desc("createdAt"));
-        }
+        Sort sort = determineSortStrategy(type);
 
         Pageable pageable = PageRequest.of(page,size,sort);
 
@@ -416,5 +406,15 @@ public class RecipeServiceImpl implements RecipeService{
         } catch (IOException e) {
             throw new FileStorageException(ErrorCode.FILE_STORAGE_ERROR, e.getMessage());
         }
+    }
+
+    private Sort determineSortStrategy(String type){
+        if (type.equals("newest")){
+            return Sort.by(Sort.Order.desc("createdAt"));
+        }
+        if (type.equals("popularity")){
+            return Sort.by(Sort.Order.desc("likeCount"));
+        }
+        throw new BadRequestException(ErrorCode.SORT_TYPE_ERROR);
     }
 }

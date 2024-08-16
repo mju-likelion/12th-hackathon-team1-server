@@ -18,6 +18,7 @@ public enum ErrorCode {
     DUPLICATED_RECIPE_INGREDIENT("4006","중복되는 레시피 재료 관련 요청은 불가합니다."),
     FILE_TYPE_ERROR("4007", "유효하지 않은 파일 형식입니다."),
     IMAGE_NOT_IN_RECIPE("4008", "이미지가 존재하지 않는 레시피입니다."),
+    SORT_TYPE_ERROR("4009", "정렬 타입이 유효하지 않습니다."),
 
     //AuthorizedException
     COOKIE_NOT_FOUND("4010", "쿠키를 찾을 수 없습니다."),
