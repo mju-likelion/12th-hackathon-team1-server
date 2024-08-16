@@ -273,12 +273,7 @@ public class RecipeServiceImpl implements RecipeService{
     @Override
     public RecipeListDto findMyRecipes(User user, String type, int page, int size) {
 
-        Sort sort;
-        if (type.equals("popularity")){
-            sort = Sort.by(Sort.Order.desc("likeCount"));
-        }else{
-            sort = Sort.by(Sort.Order.desc("createdAt"));
-        }
+        Sort sort = determineSortStrategy(type);
 
         Pageable pageable = PageRequest.of(page,size, sort);
         Page<Recipe> recipePage = recipeRepository.findAllByUser(user, pageable);
