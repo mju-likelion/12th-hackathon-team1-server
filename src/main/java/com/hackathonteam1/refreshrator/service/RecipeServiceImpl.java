@@ -244,12 +244,7 @@ public class RecipeServiceImpl implements RecipeService{
 
         validateImageFile(file); //확장자를 통해 이미지 파일인지 확인
 
-        String url;
-        try {
-           url = s3Uploader.upload(file);
-        } catch (IOException e) {
-            throw new FileStorageException(ErrorCode.FILE_STORAGE_ERROR, e.getMessage());
-        }
+        String url = uplaodFileToS3(file);
 
         Image image = Image.builder()
                 .url(url)
@@ -413,5 +408,13 @@ public class RecipeServiceImpl implements RecipeService{
         if(!IMAGE_EXTENSION.stream().anyMatch(i-> lowerFileName.endsWith(i))){
             throw new FileStorageException(ErrorCode.FILE_TYPE_ERROR);
         };
+    }
+
+    private String uplaodFileToS3(MultipartFile file){
+        try {
+            return s3Uploader.upload(file);
+        } catch (IOException e) {
+            throw new FileStorageException(ErrorCode.FILE_STORAGE_ERROR, e.getMessage());
+        }
     }
 }
