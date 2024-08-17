@@ -169,8 +169,8 @@ public class RecipeServiceImpl implements RecipeService{
         Recipe recipe = findRecipeByRecipeId(recipeId);
         checkAuth(recipe.getUser(), user);
 
-        //기존에 레시피에 존재하던 재료 리스트
-        List<Ingredient> existingIngredients = findAllIngredientByIngredientRecipes(findAllIngredientRecipeByRecipe(recipe));
+        //기존에 레시피에 존재하던 재료 리스트, 탐색 속도 향상을 위해 Set을 사용
+        Set<Ingredient> existingIngredients = new HashSet<>(findAllIngredientByIngredientRecipes(findAllIngredientRecipeByRecipe(recipe)));
 
         List<UUID> requestedIngredientIds = registerIngredientRecipesDto.getIngredientIds();
         //요청된 재료에 중복이 있는지 확인
@@ -188,6 +188,7 @@ public class RecipeServiceImpl implements RecipeService{
         });
     }
 
+    //레시피 재료 삭제
     @Override
     @CacheEvict(value = "recipeDetailCache", key = "#recipeId", cacheManager = "redisCacheManager")
     public void deleteIngredientRecipe(User user, UUID recipeId, DeleteIngredientRecipesDto deleteIngredientRecipesDto) {
