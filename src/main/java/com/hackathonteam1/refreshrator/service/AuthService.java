@@ -1,6 +1,5 @@
 package com.hackathonteam1.refreshrator.service;
 
-import com.hackathonteam1.refreshrator.authentication.JwtEncoder;
 import com.hackathonteam1.refreshrator.authentication.JwtTokenProvider;
 import com.hackathonteam1.refreshrator.authentication.PasswordHashEncryption;
 import com.hackathonteam1.refreshrator.dto.request.auth.LoginDto;
@@ -86,7 +85,7 @@ public class AuthService {
             recipes.forEach(recipe-> {
                 if(recipe.isContainingImage()){
                     Image image = findImageByRecipe(recipe);
-                    s3Uploader.removeS3File(image.getUrl().split("/")[3]);
+                    s3Uploader.removeS3FileByUrl(image.getUrl());
                 }
             });
         }
@@ -163,6 +162,8 @@ public class AuthService {
                     String accessToken = jwtTokenProvider.createToken(userId.toString());
 
                     //refreshToken Rotation을 위해 매번 재발급.
+                    //refreshToken을 위해 redis에는 <key:userId, value:refreshTokenId>와
+                    //<key:refreshTokenId, value:refreshToken>의 형태로 2개를 저장함
                     redisUtilForRefreshToken.delete(refreshToken.getTokenId().toString());
                     redisUtilForUserId.delete(userId.toString());
 

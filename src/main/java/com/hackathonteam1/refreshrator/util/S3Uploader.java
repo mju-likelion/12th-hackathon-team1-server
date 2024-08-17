@@ -33,9 +33,14 @@ public class S3Uploader {
     }
 
 
-    public void removeS3File(String fileName){
+    public void removeS3FileByUrl(String url){
+        String fileName = extractFileNameByUrl(url);
         final DeleteObjectRequest deleteObjectRequest = new DeleteObjectRequest(bucket, fileName);
         amazonS3Client.deleteObject(deleteObjectRequest);
+    }
+
+    private String extractFileNameByUrl(String url){
+        return url.split("/")[3];
     }
 
 }

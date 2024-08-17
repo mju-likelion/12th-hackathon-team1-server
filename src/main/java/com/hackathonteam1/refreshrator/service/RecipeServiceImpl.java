@@ -30,10 +30,8 @@ import com.hackathonteam1.refreshrator.util.S3Uploader;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
-import org.springframework.http.MediaType;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -67,12 +65,7 @@ public class RecipeServiceImpl implements RecipeService{
     @Cacheable(value = "recipeListCache",key = "#keyword + '-' + #type + '-' + #page + '-' + #size", cacheManager = "redisCacheManager")
     public RecipeListDto getList(String keyword, String type, int page, int size) {
 
-        Sort sort;
-        if (type.equals("newest")){
-            sort = Sort.by(Sort.Order.desc("createdAt"));
-        }else{
-            sort = Sort.by(Sort.Order.desc("likeCount"));
-        }
+        Sort sort = determineSortStrategy(type);
 
         Pageable pageable = PageRequest.of(page, size, sort);
 
@@ -98,10 +91,7 @@ public class RecipeServiceImpl implements RecipeService{
         }
 
         //동일한 재료를 요청할 경우 예외처리
-        Set<UUID> ingredientIdSet = new HashSet<>(registerRecipeDto.getIngredientIds());
-        if(ingredientIdSet.size() != registerRecipeDto.getIngredientIds().size()){
-            throw new BadRequestException(ErrorCode.DUPLICATED_RECIPE_INGREDIENT);
-        }
+        checkDuplicatedIngredient(registerRecipeDto.getIngredientIds());
 
         Recipe recipe = Recipe.builder()
                 .name(registerRecipeDto.getName())
@@ -112,7 +102,8 @@ public class RecipeServiceImpl implements RecipeService{
 
         recipeRepository.save(recipe);
 
-        ingredientIdSet.stream().forEach(i -> registerRecipeIngredient(findIngredientByIngredientId(i),recipe));
+        registerRecipeDto.getIngredientIds().stream().forEach(i ->
+                registerRecipeIngredient(findIngredientByIngredientId(i),recipe));
     }
 
     //상세조회
@@ -134,11 +125,10 @@ public class RecipeServiceImpl implements RecipeService{
                     @CacheEvict(value = "recipeDetailCache", key = "#recipeId", cacheManager = "redisCacheManager")
             }
     )
+    @Transactional
     public void modifyContent(ModifyRecipeDto modifyRecipeDto, User user, UUID recipeId) {
         Recipe recipe = findRecipeByRecipeId(recipeId);
         checkAuth(recipe.getUser(), user);
-
-        Image image = null;
 
         if(modifyRecipeDto.getImageId()!=null){
             recipe.updateImage(findImageByImageId(modifyRecipeDto.getImageId()));
@@ -166,7 +156,7 @@ public class RecipeServiceImpl implements RecipeService{
         checkAuth(recipe.getUser(), user);
         if(recipe.isContainingImage()){
             Image image = findImageByRecipe(recipe);
-            s3Uploader.removeS3File(image.getUrl().split("/")[3]);
+            s3Uploader.removeS3FileByUrl(image.getUrl());
         }
         recipeRepository.delete(recipe);
     }
@@ -179,12 +169,14 @@ public class RecipeServiceImpl implements RecipeService{
         Recipe recipe = findRecipeByRecipeId(recipeId);
         checkAuth(recipe.getUser(), user);
 
-        //기존에 레시피에 존재하던 재료 리스트
-        List<Ingredient> ingredients = findAllIngredientByIngredientRecipes(findAllIngredientRecipeByRecipe(recipe));
+        //기존에 레시피에 존재하던 재료 리스트, 탐색 속도 향상을 위해 Set을 사용
+        Set<Ingredient> existingIngredients = new HashSet<>(findAllIngredientByIngredientRecipes(findAllIngredientRecipeByRecipe(recipe)));
 
-        HashSet<Ingredient> existingIngredients = new HashSet<>(ingredients);
+        List<UUID> requestedIngredientIds = registerIngredientRecipesDto.getIngredientIds();
+        //요청된 재료에 중복이 있는지 확인
+        checkDuplicatedIngredient(requestedIngredientIds);
 
-        List<Ingredient> newIngredients = registerIngredientRecipesDto.nonDupIngredientIds().stream().map(i->
+        List<Ingredient> newIngredients = requestedIngredientIds.stream().map(i->
                 findIngredientByIngredientId(i)).collect(Collectors.toList());
 
         //기존에 레시피에 존재하던 재료인지 확인 후 추가
@@ -196,6 +188,7 @@ public class RecipeServiceImpl implements RecipeService{
         });
     }
 
+    //레시피 재료 삭제
     @Override
     @CacheEvict(value = "recipeDetailCache", key = "#recipeId", cacheManager = "redisCacheManager")
     public void deleteIngredientRecipe(User user, UUID recipeId, DeleteIngredientRecipesDto deleteIngredientRecipesDto) {
@@ -204,10 +197,15 @@ public class RecipeServiceImpl implements RecipeService{
 
         //기존 레시피의 재료들
         List<IngredientRecipe> existingIngredientRecipes = findAllIngredientRecipeByRecipe(recipe);
-
+        //기존 레시피의 재료들의 Id를 파싱해서 가져옴
         Set<UUID> existingIngredientRecipeIds = existingIngredientRecipes.stream().map(i->i.getId()).collect(Collectors.toSet());
 
-        deleteIngredientRecipesDto.nonDupIngredientIds().forEach(i -> {
+        List<UUID>requestedIngredientIds = deleteIngredientRecipesDto.getIngredientRecipeIds();
+
+        //요청된 재료 중복 확인
+        checkDuplicatedIngredient(requestedIngredientIds);
+
+        requestedIngredientIds.forEach(i -> {
             if(!existingIngredientRecipeIds.contains(i)){
                 throw new NotFoundException(ErrorCode.INGREDIENT_RECIPE_NOT_FOUND);
             }
@@ -216,6 +214,7 @@ public class RecipeServiceImpl implements RecipeService{
 
     }
 
+    //추천 레시피 조회
     @Override
     public RecipeListDto getRecommendation(int page, int size, int match, String type, User user) {
         Set<FridgeItem> userFridgeItems = findFridgeByUser(user).getFridgeItem().stream()
@@ -224,12 +223,7 @@ public class RecipeServiceImpl implements RecipeService{
 
         Set<Ingredient> usersIngredients = userFridgeItems.stream().map(i -> i.getIngredient()).collect(Collectors.toSet());
 
-        Sort sort;
-        if (type.equals("popularity")){
-            sort = Sort.by(Sort.Order.desc("likeCount"));
-        }else{
-            sort = Sort.by(Sort.Order.desc("createdAt"));
-        }
+        Sort sort = determineSortStrategy(type);
 
         Pageable pageable = PageRequest.of(page,size,sort);
 
@@ -242,17 +236,9 @@ public class RecipeServiceImpl implements RecipeService{
     @Override
     public ImageDto registerImage(MultipartFile file) {
 
-        String fileName = file.getOriginalFilename();
-        if(!IMAGE_EXTENSION.stream().anyMatch(i-> fileName.endsWith(i))){
-            throw new FileStorageException(ErrorCode.FILE_TYPE_ERROR);
-        };
+        validateImageFile(file); //확장자를 통해 이미지 파일인지 확인
 
-        String url;
-        try {
-           url = s3Uploader.upload(file);
-        } catch (IOException e) {
-            throw new FileStorageException(ErrorCode.FILE_STORAGE_ERROR, e.getMessage());
-        }
+        String url = uplaodFileToS3(file);
 
         Image image = Image.builder()
                 .url(url)
@@ -271,8 +257,8 @@ public class RecipeServiceImpl implements RecipeService{
     )
     public void deleteImage(UUID imageId, User user) {
         Image image = findImageByImageId(imageId);
+
         Recipe recipe = image.getRecipe();
-        UUID recipeId = recipe.getId();
 
         if(!recipe.isContainingImage()){
             throw new BadRequestException(ErrorCode.IMAGE_NOT_IN_RECIPE);
@@ -280,19 +266,15 @@ public class RecipeServiceImpl implements RecipeService{
 
         checkAuth(recipe.getUser(), user);
         recipe.deleteImage();
-        s3Uploader.removeS3File(image.getUrl().split("/")[3]);
+        s3Uploader.removeS3FileByUrl(image.getUrl());
         imageRepository.delete(image);
     }
 
+    //내가 작성한 레시피 목록 조회
     @Override
     public RecipeListDto findMyRecipes(User user, String type, int page, int size) {
 
-        Sort sort;
-        if (type.equals("popularity")){
-            sort = Sort.by(Sort.Order.desc("likeCount"));
-        }else{
-            sort = Sort.by(Sort.Order.desc("createdAt"));
-        }
+        Sort sort = determineSortStrategy(type);
 
         Pageable pageable = PageRequest.of(page,size, sort);
         Page<Recipe> recipePage = recipeRepository.findAllByUser(user, pageable);
@@ -409,5 +391,37 @@ public class RecipeServiceImpl implements RecipeService{
 
     private Image findImageByRecipe(Recipe recipe){
         return imageRepository.findByRecipe(recipe).orElseThrow(()->new NotFoundException(ErrorCode.IMAGE_NOT_FOUND));
+    }
+
+    private void validateImageFile(MultipartFile file){
+        String lowerFileName = file.getOriginalFilename().toLowerCase();
+        if(!IMAGE_EXTENSION.stream().anyMatch(i-> lowerFileName.endsWith(i))){
+            throw new FileStorageException(ErrorCode.FILE_TYPE_ERROR);
+        };
+    }
+
+    private String uplaodFileToS3(MultipartFile file){
+        try {
+            return s3Uploader.upload(file);
+        } catch (IOException e) {
+            throw new FileStorageException(ErrorCode.FILE_STORAGE_ERROR, e.getMessage());
+        }
+    }
+
+    private Sort determineSortStrategy(String type){
+        if (type.equals("newest")){
+            return Sort.by(Sort.Order.desc("createdAt"));
+        }
+        if (type.equals("popularity")){
+            return Sort.by(Sort.Order.desc("likeCount"));
+        }
+        throw new BadRequestException(ErrorCode.SORT_TYPE_ERROR);
+    }
+
+    private void checkDuplicatedIngredient(List<UUID> ingredientIds){
+        Set<UUID> ingredientIdSet = new HashSet<>(ingredientIds);
+        if(ingredientIdSet.size() != ingredientIds.size()){
+            throw new BadRequestException(ErrorCode.DUPLICATED_RECIPE_INGREDIENT);
+        }
     }
 }
