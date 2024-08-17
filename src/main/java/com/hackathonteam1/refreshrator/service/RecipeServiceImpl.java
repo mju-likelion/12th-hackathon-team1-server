@@ -202,6 +202,7 @@ public class RecipeServiceImpl implements RecipeService{
 
         List<UUID>requestedIngredientIds = deleteIngredientRecipesDto.getIngredientRecipeIds();
 
+        //요청된 재료 중복 확인
         checkDuplicatedIngredient(requestedIngredientIds);
 
         requestedIngredientIds.forEach(i -> {
@@ -213,6 +214,7 @@ public class RecipeServiceImpl implements RecipeService{
 
     }
 
+    //추천 레시피 조회
     @Override
     public RecipeListDto getRecommendation(int page, int size, int match, String type, User user) {
         Set<FridgeItem> userFridgeItems = findFridgeByUser(user).getFridgeItem().stream()
@@ -255,8 +257,8 @@ public class RecipeServiceImpl implements RecipeService{
     )
     public void deleteImage(UUID imageId, User user) {
         Image image = findImageByImageId(imageId);
+
         Recipe recipe = image.getRecipe();
-        UUID recipeId = recipe.getId();
 
         if(!recipe.isContainingImage()){
             throw new BadRequestException(ErrorCode.IMAGE_NOT_IN_RECIPE);
@@ -268,6 +270,7 @@ public class RecipeServiceImpl implements RecipeService{
         imageRepository.delete(image);
     }
 
+    //내가 작성한 레시피 목록 조회
     @Override
     public RecipeListDto findMyRecipes(User user, String type, int page, int size) {
 
