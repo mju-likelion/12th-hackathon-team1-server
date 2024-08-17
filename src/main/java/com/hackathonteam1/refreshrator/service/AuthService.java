@@ -162,6 +162,8 @@ public class AuthService {
                     String accessToken = jwtTokenProvider.createToken(userId.toString());
 
                     //refreshToken Rotation을 위해 매번 재발급.
+                    //refreshToken을 위해 redis에는 <key:userId, value:refreshTokenId>와
+                    //<key:refreshTokenId, value:refreshToken>의 형태로 2개를 저장함
                     redisUtilForRefreshToken.delete(refreshToken.getTokenId().toString());
                     redisUtilForUserId.delete(userId.toString());
 
