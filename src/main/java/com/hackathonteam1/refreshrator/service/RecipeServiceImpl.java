@@ -30,10 +30,8 @@ import com.hackathonteam1.refreshrator.util.S3Uploader;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
-import org.springframework.http.MediaType;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -127,11 +125,10 @@ public class RecipeServiceImpl implements RecipeService{
                     @CacheEvict(value = "recipeDetailCache", key = "#recipeId", cacheManager = "redisCacheManager")
             }
     )
+    @Transactional
     public void modifyContent(ModifyRecipeDto modifyRecipeDto, User user, UUID recipeId) {
         Recipe recipe = findRecipeByRecipeId(recipeId);
         checkAuth(recipe.getUser(), user);
-
-        Image image = null;
 
         if(modifyRecipeDto.getImageId()!=null){
             recipe.updateImage(findImageByImageId(modifyRecipeDto.getImageId()));
@@ -159,7 +156,7 @@ public class RecipeServiceImpl implements RecipeService{
         checkAuth(recipe.getUser(), user);
         if(recipe.isContainingImage()){
             Image image = findImageByRecipe(recipe);
-            s3Uploader.removeS3File(image.getUrl().split("/")[3]);
+            s3Uploader.removeS3FileByUrl(image.getUrl());
         }
         recipeRepository.delete(recipe);
     }
@@ -266,7 +263,7 @@ public class RecipeServiceImpl implements RecipeService{
 
         checkAuth(recipe.getUser(), user);
         recipe.deleteImage();
-        s3Uploader.removeS3File(image.getUrl().split("/")[3]);
+        s3Uploader.removeS3FileByUrl(image.getUrl());
         imageRepository.delete(image);
     }
 

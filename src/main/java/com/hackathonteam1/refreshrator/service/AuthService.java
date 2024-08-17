@@ -1,6 +1,5 @@
 package com.hackathonteam1.refreshrator.service;
 
-import com.hackathonteam1.refreshrator.authentication.JwtEncoder;
 import com.hackathonteam1.refreshrator.authentication.JwtTokenProvider;
 import com.hackathonteam1.refreshrator.authentication.PasswordHashEncryption;
 import com.hackathonteam1.refreshrator.dto.request.auth.LoginDto;
@@ -86,7 +85,7 @@ public class AuthService {
             recipes.forEach(recipe-> {
                 if(recipe.isContainingImage()){
                     Image image = findImageByRecipe(recipe);
-                    s3Uploader.removeS3File(image.getUrl().split("/")[3]);
+                    s3Uploader.removeS3FileByUrl(image.getUrl());
                 }
             });
         }
