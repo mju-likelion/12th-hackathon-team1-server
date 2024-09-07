@@ -32,4 +32,16 @@ public class User extends BaseEntity{
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Fridge fridge;
+
+
+    public User(String email, String password,String name ){
+
+        this.email=email;
+        this.password=password;
+        this.name=name;
+
+        this.fridge= Fridge.builder()
+                .user(this)
+                .build();
+    }
 }

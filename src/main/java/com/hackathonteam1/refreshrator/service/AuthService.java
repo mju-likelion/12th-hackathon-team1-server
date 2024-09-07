@@ -58,19 +58,9 @@ public class AuthService {
         String plainPassword = signinDto.getPassword();
         String hashedPassword = passwordHashEncryption.encrypt(plainPassword);
 
-        //유저 생성과 등록
-        User signinUser=User.builder()
-                .name(signinDto.getName())
-                .email(signinDto.getEmail())
-                .password(hashedPassword)
-                .build();
+        //유저 생성과 냉장고 등록
+        User signinUser= new User(signinDto.getEmail(),hashedPassword,signinDto.getName());
         userRepository.save(signinUser);
-
-        //냉장고 생성
-        Fridge fridge= Fridge.builder()
-                .user(signinUser)
-                .build();
-        fridgeRepository.save(fridge);
     }
 
     //회원탈퇴
