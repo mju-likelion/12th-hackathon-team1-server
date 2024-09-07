@@ -39,6 +39,7 @@ public enum ErrorCode {
     PAGE_NOT_FOUND("4046", "페이지를 찾을 수 없습니다"),
     IMAGE_NOT_FOUND("4047","이미지를 찾을 수 없습니다"),
     RECIPE_LIKE_NOT_FOUND("4048", "좋아요를 누른 레시피가 아닙니다."),
+    STORAGE_NOT_FOUND("4049","존재하지 않는 저장 방법입니다."),
 
 
     //ConflictException

@@ -1,5 +1,7 @@
 package com.hackathonteam1.refreshrator.entity;
 
+import com.hackathonteam1.refreshrator.exception.NotFoundException;
+import com.hackathonteam1.refreshrator.exception.errorcode.ErrorCode;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -37,6 +39,17 @@ public class FridgeItem extends BaseEntity{
     public enum Storage{
         STORE_AT_ROOM_TEMPERATURE, REFRIGERATED, FROZEN;
     }
+
+    //저장방법 결정 메서드
+    public static Storage of(String storage){
+        return switch (storage){
+            case "상온"-> FridgeItem.Storage.STORE_AT_ROOM_TEMPERATURE;
+            case "냉동"-> FridgeItem.Storage.FROZEN;
+            case "냉장" -> FridgeItem.Storage.REFRIGERATED;
+            default -> throw new NotFoundException(ErrorCode.STORAGE_NOT_FOUND);
+        };
+    }
+
     public boolean isExpired(){
         return LocalDate.now().isAfter(this.expiredDate);
     }

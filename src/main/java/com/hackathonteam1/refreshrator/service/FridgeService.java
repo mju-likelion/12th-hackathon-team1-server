@@ -47,7 +47,7 @@ public class FridgeService {
                 .ingredient(ingredient)
                 .expiredDate(addFridgeDto.getExpiredDate())
                 .quantity(addFridgeDto.getQuantity())
-                .storage(defindStorage(addFridgeDto.getStorage()))
+                .storage(FridgeItem.of(addFridgeDto.getStorage()))
                 .memo(addFridgeDto.getMemo())
                 .build();
 
@@ -68,7 +68,7 @@ public class FridgeService {
         //수정하기
         fridgeItem.setExpiredDate(addFridgeDto.getExpiredDate());
         fridgeItem.setQuantity(addFridgeDto.getQuantity());
-        fridgeItem.setStorage(defindStorage(addFridgeDto.getStorage()));
+        fridgeItem.setStorage(FridgeItem.of(addFridgeDto.getStorage()));
         fridgeItem.setMemo(addFridgeDto.getMemo());
 
         //저장하기
@@ -138,16 +138,6 @@ public class FridgeService {
 
         //조회 하기
         return FridgeItemResponseData.fromFridgeItem(fridgeItem);
-    }
-
-
-    //저장방법 결정 메서드
-    private FridgeItem.Storage defindStorage(String storage){
-        return switch (storage){
-            case "상온"-> FridgeItem.Storage.STORE_AT_ROOM_TEMPERATURE;
-            case "냉동"-> FridgeItem.Storage.FROZEN;
-            default -> FridgeItem.Storage.REFRIGERATED;
-        };
     }
 
     //데이터베이스에서 재료id로 재료를 찾는 메서드
