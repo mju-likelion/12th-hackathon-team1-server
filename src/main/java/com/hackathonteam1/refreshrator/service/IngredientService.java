@@ -19,14 +19,11 @@ public class IngredientService {
 
     public IngredientListDto searchIngredientByName(String name) {
         List<Ingredient> ingredients = ingredientRepository.findAll();
-        List<IngredientDto> ingredientDtoList = new ArrayList<>();
 
-        for(Ingredient ingredient : ingredients) {
-            if(ingredient.getName().contains(name)) { // 해당 검색어를 포함하는 모든 재료를 찾는다.
-                IngredientDto ingredientDto = IngredientDto.changeToDto(ingredient);
-                ingredientDtoList.add(ingredientDto);
-            }
-        }
+        List<IngredientDto> ingredientDtoList = ingredients.stream()
+                .filter(ingredient -> ingredient.getName().contains(name))
+                .map(IngredientDto::changeToDto)
+                .toList();
 
         return new IngredientListDto(ingredientDtoList);
     }
