@@ -144,8 +144,6 @@ public class FridgeService {
             case "상온"-> FridgeItem.Storage.STORE_AT_ROOM_TEMPERATURE;
             case "냉동"-> FridgeItem.Storage.FROZEN;
             default -> FridgeItem.Storage.REFRIGERATED;
-            // 예외 처리하기
-            // 이 역할이 fridgeService의 역할일까?
         };
     }
 
