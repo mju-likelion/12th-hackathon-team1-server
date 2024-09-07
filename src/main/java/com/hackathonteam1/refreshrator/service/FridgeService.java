@@ -36,7 +36,7 @@ public class FridgeService {
     public void addIngredientInFridge(AddFridgeDto addFridgeDto, User user){
 
         //재료 찾기
-        Ingredient ingredient=findIngredient(addFridgeDto);
+        Ingredient ingredient=findIngredient(addFridgeDto.getIngredientId());
 
         //냉장고 찾기
         Fridge fridge=findFridge(user);
@@ -151,8 +151,8 @@ public class FridgeService {
     }
 
     //데이터베이스에서 재료id로 재료를 찾는 메서드
-    private Ingredient findIngredient(AddFridgeDto addFridgeDto){
-        return ingredientRepository.findById(addFridgeDto.getIngredientId())
+    private Ingredient findIngredient(UUID ingredientId){
+        return ingredientRepository.findById(ingredientId)
                 .orElseThrow(()-> new NotFoundException(ErrorCode.INGREDIENT_NOT_FOUND));
     }
 
