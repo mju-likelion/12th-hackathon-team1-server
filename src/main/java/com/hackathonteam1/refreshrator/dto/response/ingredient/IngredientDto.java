@@ -20,6 +20,6 @@ public class IngredientDto {
                 .id(ingredient.getId())
                 .name(ingredient.getName())
                 .build();
-    }
 
+    }
 }

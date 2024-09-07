@@ -23,16 +23,11 @@ public class IngredientService {
 
         for(Ingredient ingredient : ingredients) {
             if(ingredient.getName().contains(name)) { // 해당 검색어를 포함하는 모든 재료를 찾는다.
-                IngredientDto ingredientDto = IngredientDto.builder()
-                        .id(ingredient.getId())
-                        .name(ingredient.getName())
-                        .build();
+                IngredientDto ingredientDto = IngredientDto.changeToDto(ingredient);
                 ingredientDtoList.add(ingredientDto);
             }
         }
-        if(ingredientDtoList.isEmpty()) {
-            throw new NotFoundException(ErrorCode.INGREDIENT_NOT_FOUND);
-        }
+
         return new IngredientListDto(ingredientDtoList);
     }
 }
