@@ -52,10 +52,7 @@ public class AuthService {
     public void signin(SigninDto signinDto){
 
         //아이디(이메일) 중복 방지
-        User user=userRepository.findByEmail(signinDto.getEmail());
-        if(user!=null){
-            throw new ConflictException(ErrorCode.DUPLICATED_EMAIL);
-        }
+        checkEmailDuplicated(signinDto.getEmail());
 
         //비밀번호 암호화
         String plainPassword = signinDto.getPassword();
@@ -201,5 +198,11 @@ public class AuthService {
 
     private List<Recipe> findAllRecipesByUser(User user){
         return recipeRepository.findAllByUser(user).orElseThrow(()-> new NotFoundException(ErrorCode.RECIPE_NOT_FOUND));
+    }
+
+    private void checkEmailDuplicated(String email){
+        if(userRepository.existsByEmail(email)){
+            throw new ConflictException(ErrorCode.DUPLICATED_EMAIL);
+        }
     }
 }
