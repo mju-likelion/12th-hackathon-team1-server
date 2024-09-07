@@ -112,14 +112,11 @@ public class FridgeService {
         for(FridgeItem fridgeItem : fridgeItems){
             FridgeItemDto fridgeItemDto = FridgeItemDto.changeToDto(fridgeItem);
 
-            if(fridgeItem.isExpired()){
-                expirationDateList.add(fridgeItemDto);
-                continue;
-            }
             switch (fridgeItem.getStorage()){
                 case STORE_AT_ROOM_TEMPERATURE -> ambientStorageList.add(fridgeItemDto);
                 case REFRIGERATED -> coldStorageList.add(fridgeItemDto);
                 case FROZEN -> frozenStorageList.add(fridgeItemDto);
+                default -> expirationDateList.add(fridgeItemDto);
             }
 
         }
