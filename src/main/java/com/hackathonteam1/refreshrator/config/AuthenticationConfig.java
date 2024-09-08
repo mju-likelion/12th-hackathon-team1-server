@@ -21,11 +21,10 @@ public class AuthenticationConfig implements WebMvcConfigurer {
             "/auth/leave","/auth/logout", "/auth/likes",
     };
     private static final String[] ADD_PATH_PATTERNS_RECIPE = {
-            "/recipes", "/recipes/*", "/recipes/recommendations/*", "/recipes/images/*", "/recipes/*/ingredients", "/recipes/{id}/likes"
+            "/recipes", "/recipes/{id}", "/recipes/recommendations", "/recipes/images", "/recipes/images/{id}", "/recipes/{id}/ingredients", "/recipes/{id}/likes"
     };
-    private static final String[] ADD_PATH_PATTERNS_FRIDGE = { "/fridge/ingredients/*", "/fridge/ingredients"};
+    private static final String[] ADD_PATH_PATTERNS_FRIDGE = { "/fridge/ingredients", "/fridge/ingredients/{id}"};
     private static final String[] ADD_PATH_PATTERNS_USER = {"/users/me/recipe"};
-
     private static final String[] EXCLUDE_PATH_PATTERNS_AUTH = {"/auth/signin", "/auth/login", "/auth/refresh"};
 
     //인터셉터 등록 + 경로 설정
