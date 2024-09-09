@@ -13,7 +13,6 @@ import com.hackathonteam1.refreshrator.exception.NotFoundException;
 import com.hackathonteam1.refreshrator.exception.errorcode.ErrorCode;
 import com.hackathonteam1.refreshrator.repository.FridgeItemRepository;
 import com.hackathonteam1.refreshrator.repository.FridgeRepository;
-import com.hackathonteam1.refreshrator.repository.IngredientRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -27,16 +26,16 @@ import java.util.UUID;
 @Service
 @AllArgsConstructor
 public class FridgeService {
-    private IngredientRepository ingredientRepository;
     private FridgeItemRepository fridgeItemRepository;
     private FridgeRepository fridgeRepository;
+    private IngredientService ingredientService;
 
     //냉장고에 재료 추가
     @CacheEvict(value = "userIngredientsCache", key = "#user.getId()", cacheManager = "redisCacheManager")
     public void addIngredientInFridge(AddFridgeDto addFridgeDto, User user){
 
         //재료 찾기
-        Ingredient ingredient=findIngredient(addFridgeDto.getIngredientId());
+        Ingredient ingredient=ingredientService.findIngredientById(addFridgeDto.getIngredientId());
 
         //냉장고 찾기
         Fridge fridge=findFridge(user);
@@ -138,12 +137,6 @@ public class FridgeService {
 
         //조회 하기
         return FridgeItemResponseData.fromFridgeItem(fridgeItem);
-    }
-
-    //데이터베이스에서 재료id로 재료를 찾는 메서드
-    private Ingredient findIngredient(UUID ingredientId){
-        return ingredientRepository.findById(ingredientId)
-                .orElseThrow(()-> new NotFoundException(ErrorCode.INGREDIENT_NOT_FOUND));
     }
 
     //데이터베이스에서 유저의 냉장고를 찾는 메서드
