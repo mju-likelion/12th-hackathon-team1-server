@@ -19,6 +19,7 @@ public enum ErrorCode {
     FILE_TYPE_ERROR("4007", "유효하지 않은 파일 형식입니다."),
     IMAGE_NOT_IN_RECIPE("4008", "이미지가 존재하지 않는 레시피입니다."),
     SORT_TYPE_ERROR("4009", "정렬 타입이 유효하지 않습니다."),
+    STORAGE_NOT_FOUND("40010","존재하지 않는 저장 방법입니다."),
 
     //AuthorizedException
     COOKIE_NOT_FOUND("4010", "쿠키를 찾을 수 없습니다."),
@@ -39,7 +40,6 @@ public enum ErrorCode {
     PAGE_NOT_FOUND("4046", "페이지를 찾을 수 없습니다"),
     IMAGE_NOT_FOUND("4047","이미지를 찾을 수 없습니다"),
     RECIPE_LIKE_NOT_FOUND("4048", "좋아요를 누른 레시피가 아닙니다."),
-    STORAGE_NOT_FOUND("4049","존재하지 않는 저장 방법입니다."),
 
 
     //ConflictException
