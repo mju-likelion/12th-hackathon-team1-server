@@ -1,5 +1,6 @@
 package com.hackathonteam1.refreshrator.entity;
 
+import com.hackathonteam1.refreshrator.exception.BadRequestException;
 import com.hackathonteam1.refreshrator.exception.NotFoundException;
 import com.hackathonteam1.refreshrator.exception.errorcode.ErrorCode;
 import jakarta.persistence.*;
@@ -46,7 +47,7 @@ public class FridgeItem extends BaseEntity{
             case "상온"-> FridgeItem.Storage.STORE_AT_ROOM_TEMPERATURE;
             case "냉동"-> FridgeItem.Storage.FROZEN;
             case "냉장" -> FridgeItem.Storage.REFRIGERATED;
-            default -> throw new NotFoundException(ErrorCode.STORAGE_NOT_FOUND);
+            default -> throw new BadRequestException(ErrorCode.STORAGE_ERROR);
         };
     }
 
