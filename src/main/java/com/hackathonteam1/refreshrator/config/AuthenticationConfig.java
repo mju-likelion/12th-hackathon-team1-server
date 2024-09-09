@@ -17,15 +17,25 @@ public class AuthenticationConfig implements WebMvcConfigurer {
     private final AuthenticationInterceptor authenticationInterceptor;
     private final AuthenticatedUserArgumentResolver authenticatedUserArgumentResolver;
 
-    private static final String[] ADD_PATH_PATTERNS = {"/fridge/**","/recipes/**","/auth/leave","/auth/logout", "/auth/likes", "/users/me/**"};
-    private static final String[] EXCLUDE_PATH_PATTERNS = {"/auth/signin", "/auth/login", "/auth/refresh"};
+    private static final String[] ADD_PATH_PATTERNS_AUTH = {
+            "/auth/leave","/auth/logout", "/auth/likes",
+    };
+    private static final String[] ADD_PATH_PATTERNS_RECIPE = {
+            "/recipes", "/recipes/{id}", "/recipes/recommendations", "/recipes/images", "/recipes/images/{id}", "/recipes/{id}/ingredients", "/recipes/{id}/likes"
+    };
+    private static final String[] ADD_PATH_PATTERNS_FRIDGE = { "/fridge/ingredients", "/fridge/ingredients/{id}"};
+    private static final String[] ADD_PATH_PATTERNS_USER = {"/users/me/recipe"};
+    private static final String[] EXCLUDE_PATH_PATTERNS_AUTH = {"/auth/signin", "/auth/login", "/auth/refresh"};
 
     //인터셉터 등록 + 경로 설정
     @Override
     public void addInterceptors(final InterceptorRegistry registry) {
         registry.addInterceptor(authenticationInterceptor)
-                .addPathPatterns(ADD_PATH_PATTERNS)
-                .excludePathPatterns(EXCLUDE_PATH_PATTERNS);
+                .addPathPatterns(ADD_PATH_PATTERNS_RECIPE)
+                .addPathPatterns(ADD_PATH_PATTERNS_FRIDGE)
+                .addPathPatterns(ADD_PATH_PATTERNS_AUTH)
+                .addPathPatterns(ADD_PATH_PATTERNS_USER)
+                .excludePathPatterns(EXCLUDE_PATH_PATTERNS_AUTH);
 
     }
 
