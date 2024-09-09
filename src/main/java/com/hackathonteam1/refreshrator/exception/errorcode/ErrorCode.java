@@ -16,7 +16,7 @@ public enum ErrorCode {
     NOT_NULL("4005", "필수값이 공백입니다."),
     DUPLICATED_RECIPE_INGREDIENT("4006","중복되는 레시피 재료 관련 요청은 불가합니다."),
     FILE_TYPE_ERROR("4007", "유효하지 않은 파일 형식입니다."),
-    IMAGE_NOT_OF_RECIPE("4008", "해당 레시피의 이미지 요청이 아닙니다."),
+    NOT_IMAGE_OF_RECIPE("4008", "해당 레시피의 이미지 요청이 아닙니다."),
     SORT_TYPE_ERROR("4009", "정렬 타입이 유효하지 않습니다."),
 
     //AuthorizedException

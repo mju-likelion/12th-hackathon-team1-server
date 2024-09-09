@@ -21,7 +21,6 @@ import com.hackathonteam1.refreshrator.exception.*;
 import com.hackathonteam1.refreshrator.exception.errorcode.ErrorCode;
 import com.hackathonteam1.refreshrator.repository.*;
 import com.hackathonteam1.refreshrator.repository.FridgeRepository;
-import com.hackathonteam1.refreshrator.repository.ImageRepository;
 import com.hackathonteam1.refreshrator.repository.IngredientRecipeRepository;
 import com.hackathonteam1.refreshrator.repository.IngredientRepository;
 import com.hackathonteam1.refreshrator.repository.RecipeRepository;
@@ -39,10 +38,8 @@ import org.springframework.data.domain.Sort;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 
-import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -131,7 +128,7 @@ public class RecipeServiceImpl implements RecipeService{
 
         if(modifyRecipeDto.getDeleteImageId()!=null){
             if(!recipe.getImage().getId().equals(modifyRecipeDto.getDeleteImageId())){
-                throw new BadRequestException(ErrorCode.IMAGE_NOT_OF_RECIPE);
+                throw new BadRequestException(ErrorCode.NOT_IMAGE_OF_RECIPE);
             }
             recipe.deleteImage();
         }
