@@ -37,7 +37,6 @@ public interface RecipeService {
     //레시피 재료 삭제
     public void deleteIngredientRecipe(User user, UUID recipeId, DeleteIngredientRecipesDto deleteIngredientRecipesDto);
 
-
     //추천 레시피 목록 조회
     public RecipeListDto getRecommendation(int page, int size, int match, String type, User user);
 
@@ -46,14 +45,8 @@ public interface RecipeService {
 
     // 레시피에 좋아요 삭제
     public void deleteLikeFromRecipe(User user, UUID recipeId);
-  
-    //파일(이미지) 등록
-    public ImageDto registerImage(MultipartFile file);
 
-    //파일(이미지) 삭제
-    public void deleteImage(UUID imageId, User user);
-
-//    자신이 작성한 레시피 조회
+    //자신이 작성한 레시피 조회
     public RecipeListDto findMyRecipes(User user, String type, int page, int size);
 
 }

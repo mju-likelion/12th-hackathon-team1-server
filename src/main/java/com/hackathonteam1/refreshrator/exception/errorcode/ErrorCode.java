@@ -1,6 +1,5 @@
 package com.hackathonteam1.refreshrator.exception.errorcode;
 
-import com.hackathonteam1.refreshrator.entity.Recipe;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -17,7 +16,7 @@ public enum ErrorCode {
     NOT_NULL("4005", "필수값이 공백입니다."),
     DUPLICATED_RECIPE_INGREDIENT("4006","중복되는 레시피 재료 관련 요청은 불가합니다."),
     FILE_TYPE_ERROR("4007", "유효하지 않은 파일 형식입니다."),
-    IMAGE_NOT_IN_RECIPE("4008", "이미지가 존재하지 않는 레시피입니다."),
+    NOT_IMAGE_OF_RECIPE("4008", "해당 레시피의 이미지 요청이 아닙니다."),
     SORT_TYPE_ERROR("4009", "정렬 타입이 유효하지 않습니다."),
 
     //AuthorizedException
@@ -39,7 +38,6 @@ public enum ErrorCode {
     PAGE_NOT_FOUND("4046", "페이지를 찾을 수 없습니다"),
     IMAGE_NOT_FOUND("4047","이미지를 찾을 수 없습니다"),
     RECIPE_LIKE_NOT_FOUND("4048", "좋아요를 누른 레시피가 아닙니다."),
-
 
     //ConflictException
     DUPLICATED_EMAIL("4090", "이미 사용 중인 이메일입니다."),

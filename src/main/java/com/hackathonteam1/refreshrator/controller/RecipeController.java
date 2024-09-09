@@ -10,6 +10,7 @@ import com.hackathonteam1.refreshrator.dto.response.file.ImageDto;
 import com.hackathonteam1.refreshrator.dto.response.recipe.DetailRecipeDto;
 import com.hackathonteam1.refreshrator.dto.response.recipe.RecipeListDto;
 import com.hackathonteam1.refreshrator.entity.User;
+import com.hackathonteam1.refreshrator.service.ImageService;
 import com.hackathonteam1.refreshrator.service.RecipeService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +27,7 @@ import java.util.UUID;
 @RequestMapping("/recipes")
 public class RecipeController {
     private final RecipeService recipeService;
+    private final ImageService imageService;
 
     @GetMapping
     public ResponseEntity<ResponseDto<RecipeListDto>> getList(@RequestParam(name = "keyword",defaultValue = "")String keyword, @RequestParam(name = "type", defaultValue = "newest")String type,
@@ -102,14 +104,14 @@ public class RecipeController {
     @PostMapping(value = "/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE )
     public ResponseEntity<ResponseDto<ImageDto>> registerFile(
             @RequestPart MultipartFile file){
-        ImageDto imageDto =  recipeService.registerImage(file);
+        ImageDto imageDto =  imageService.registerImage(file);
         return new ResponseEntity<>(ResponseDto.res(HttpStatus.OK, "이미지 등록 성공", imageDto),HttpStatus.OK);
     }
 
     @DeleteMapping(value = "/images/{image_Id}")
     public ResponseEntity<ResponseDto<Void>> deleteFile(
             @PathVariable UUID image_Id,@AuthenticatedUser User user){
-        recipeService.deleteImage(image_Id, user);
+        imageService.deleteImage(image_Id, user);
         return new ResponseEntity<>(ResponseDto.res(HttpStatus.OK, "이미지 삭제 성공"),HttpStatus.OK);
 
     }
