@@ -55,10 +55,10 @@ public class RecipeServiceImpl implements RecipeService{
     private final IngredientRecipeRepository ingredientRecipeRepository;
     private final FridgeRepository fridgeRepository;
     private final S3Uploader s3Uploader;
-    private final ImageRepository imageRepository;
     private final RecipeLikeRepository recipeLikeRepository;
     private final ImageService imageService;
 
+    //레시피 목록 조회
     @Override
     @Cacheable(value = "recipeListCache",key = "#keyword + '-' + #type + '-' + #page + '-' + #size", cacheManager = "redisCacheManager")
     public RecipeListDto getList(String keyword, String type, int page, int size) {
@@ -78,6 +78,7 @@ public class RecipeServiceImpl implements RecipeService{
         return RecipeListDto.mapping(recipePage);
     }
 
+    //레시피 등록
     @Override
     @Transactional
     @CacheEvict(value = "recipeListCache", allEntries = true, cacheManager = "redisCacheManager")
