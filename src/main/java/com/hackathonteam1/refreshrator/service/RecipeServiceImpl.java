@@ -4,7 +4,6 @@ import com.hackathonteam1.refreshrator.dto.request.recipe.DeleteIngredientRecipe
 import com.hackathonteam1.refreshrator.dto.request.recipe.RegisterIngredientRecipesDto;
 import com.hackathonteam1.refreshrator.dto.request.recipe.ModifyRecipeDto;
 import com.hackathonteam1.refreshrator.dto.request.recipe.RegisterRecipeDto;
-import com.hackathonteam1.refreshrator.dto.response.file.ImageDto;
 import com.hackathonteam1.refreshrator.dto.response.recipe.DetailRecipeDto;
 import com.hackathonteam1.refreshrator.entity.*;
 
@@ -58,8 +57,7 @@ public class RecipeServiceImpl implements RecipeService{
     private final S3Uploader s3Uploader;
     private final ImageRepository imageRepository;
     private final RecipeLikeRepository recipeLikeRepository;
-
-    private static final List<String> IMAGE_EXTENSION = Arrays.asList(".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".tiff", ".svg", ".heic");
+    private final ImageService imageService;
 
     @Override
     @Cacheable(value = "recipeListCache",key = "#keyword + '-' + #type + '-' + #page + '-' + #size", cacheManager = "redisCacheManager")
@@ -87,7 +85,7 @@ public class RecipeServiceImpl implements RecipeService{
         Image image = null;
 
         if(registerRecipeDto.getImageId()!=null){
-            image = findImageByImageId(registerRecipeDto.getImageId());
+            image = imageService.findImageById(registerRecipeDto.getImageId());
         }
 
         //동일한 재료를 요청할 경우 예외처리
@@ -103,7 +101,7 @@ public class RecipeServiceImpl implements RecipeService{
         recipeRepository.save(recipe);
 
         registerRecipeDto.getIngredientIds().stream().forEach(i ->
-                registerRecipeIngredient(findIngredientByIngredientId(i),recipe));
+                registerRecipeIngredient(findIngredientByIngredientId(i), recipe));
     }
 
     //상세조회
@@ -117,7 +115,7 @@ public class RecipeServiceImpl implements RecipeService{
         return detailRecipeDto;
     }
 
-    //레시피명, 조리법 수정
+    //레시피 정보 수정
     @Override
     @Caching(
             evict = {
@@ -130,8 +128,14 @@ public class RecipeServiceImpl implements RecipeService{
         Recipe recipe = findRecipeByRecipeId(recipeId);
         checkAuth(recipe.getUser(), user);
 
+        if(modifyRecipeDto.getDeleteImageId()!=null){
+            if(!recipe.getImage().getId().equals(modifyRecipeDto.getDeleteImageId())){
+                throw new BadRequestException(ErrorCode.IMAGE_NOT_OF_RECIPE);
+            }
+            recipe.deleteImage();
+        }
         if(modifyRecipeDto.getImageId()!=null){
-            recipe.updateImage(findImageByImageId(modifyRecipeDto.getImageId()));
+            recipe.updateImage(imageService.findImageById(modifyRecipeDto.getImageId()));
         }
         if(modifyRecipeDto.getName()!=null){
             recipe.updateName(modifyRecipeDto.getName());
@@ -155,7 +159,7 @@ public class RecipeServiceImpl implements RecipeService{
         Recipe recipe = findRecipeByRecipeId(recipeId);
         checkAuth(recipe.getUser(), user);
         if(recipe.isContainingImage()){
-            Image image = findImageByRecipe(recipe);
+            Image image = imageService.findImageByRecipe(recipe);
             s3Uploader.removeS3FileByUrl(image.getUrl());
         }
         recipeRepository.delete(recipe);
@@ -233,43 +237,6 @@ public class RecipeServiceImpl implements RecipeService{
         return recipeListDto;
     }
 
-    @Override
-    public ImageDto registerImage(MultipartFile file) {
-
-        validateImageFile(file); //확장자를 통해 이미지 파일인지 확인
-
-        String url = uplaodFileToS3(file);
-
-        Image image = Image.builder()
-                .url(url)
-                .build();
-
-        imageRepository.save(image);
-        ImageDto imageDto = ImageDto.mapping(image);
-        return imageDto;
-    }
-
-    @Override
-    @Caching(
-            evict = {
-                    @CacheEvict(value = "recipeListCache", allEntries = true, cacheManager = "redisCacheManager"),
-            }
-    )
-    public void deleteImage(UUID imageId, User user) {
-        Image image = findImageByImageId(imageId);
-
-        Recipe recipe = image.getRecipe();
-
-        if(!recipe.isContainingImage()){
-            throw new BadRequestException(ErrorCode.IMAGE_NOT_IN_RECIPE);
-        }
-
-        checkAuth(recipe.getUser(), user);
-        recipe.deleteImage();
-        s3Uploader.removeS3FileByUrl(image.getUrl());
-        imageRepository.delete(image);
-    }
-
     //내가 작성한 레시피 목록 조회
     @Override
     public RecipeListDto findMyRecipes(User user, String type, int page, int size) {
@@ -287,10 +254,6 @@ public class RecipeServiceImpl implements RecipeService{
 
     private Fridge findFridgeByUser(User user){
         return fridgeRepository.findByUser(user).orElseThrow(()-> new NotFoundException(ErrorCode.FRIDGE_NOT_FOUND));
-    }
-
-    private Image findImageByImageId(UUID imageId){
-        return imageRepository.findById(imageId).orElseThrow(()->new NotFoundException(ErrorCode.IMAGE_NOT_FOUND));
     }
 
     private Ingredient findIngredientByIngredientId(UUID ingredientId){
@@ -389,25 +352,6 @@ public class RecipeServiceImpl implements RecipeService{
         }
     }
 
-    private Image findImageByRecipe(Recipe recipe){
-        return imageRepository.findByRecipe(recipe).orElseThrow(()->new NotFoundException(ErrorCode.IMAGE_NOT_FOUND));
-    }
-
-    private void validateImageFile(MultipartFile file){
-        String lowerFileName = file.getOriginalFilename().toLowerCase();
-        if(!IMAGE_EXTENSION.stream().anyMatch(i-> lowerFileName.endsWith(i))){
-            throw new FileStorageException(ErrorCode.FILE_TYPE_ERROR);
-        };
-    }
-
-    private String uplaodFileToS3(MultipartFile file){
-        try {
-            return s3Uploader.upload(file);
-        } catch (IOException e) {
-            throw new FileStorageException(ErrorCode.FILE_STORAGE_ERROR, e.getMessage());
-        }
-    }
-
     private Sort determineSortStrategy(String type){
         if (type.equals("newest")){
             return Sort.by(Sort.Order.desc("createdAt"));
@@ -424,4 +368,5 @@ public class RecipeServiceImpl implements RecipeService{
             throw new BadRequestException(ErrorCode.DUPLICATED_RECIPE_INGREDIENT);
         }
     }
+
 }
