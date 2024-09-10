@@ -177,4 +177,10 @@ public class AuthService {
     private Image findImageByRecipe(Recipe recipe){
         return imageRepository.findByRecipe(recipe).orElseThrow(()->new NotFoundException(ErrorCode.IMAGE_NOT_FOUND));
     }
+
+    private void checkEmailDuplicated(String email){
+        if(userRepository.existsByEmail(email)){
+            throw new ConflictException(ErrorCode.DUPLICATED_EMAIL);
+        }
+    }
 }
