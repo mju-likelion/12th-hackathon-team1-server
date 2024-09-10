@@ -14,8 +14,9 @@ import com.hackathonteam1.refreshrator.exception.NotFoundException;
 import com.hackathonteam1.refreshrator.exception.UnauthorizedException;
 import com.hackathonteam1.refreshrator.exception.errorcode.ErrorCode;
 import com.hackathonteam1.refreshrator.repository.*;
+import com.hackathonteam1.refreshrator.util.AccessTokenUtil;
 import com.hackathonteam1.refreshrator.util.RedisUtil;
-import com.hackathonteam1.refreshrator.util.S3Uploader;
+import com.hackathonteam1.refreshrator.util.RefreshTokenUtil;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
@@ -35,20 +36,23 @@ public class AuthService {
     private final UserRepository userRepository;
     private final FridgeRepository fridgeRepository;
     private final PasswordHashEncryption passwordHashEncryption;
-    private final JwtTokenProvider jwtTokenProvider;
     private final RecipeLikeRepository recipeLikeRepository;
     private final ImageRepository imageRepository;
     private final ImageService imageService;
+    private final RefreshTokenUtil refreshTokenUtil;
+    private final AccessTokenUtil accessTokenUtil;
 
-    private final RedisUtil<String, RefreshToken> redisUtilForRefreshToken;
-    private final RedisUtil<String, String> redisUtilForUserId;
+    private final RedisUtil<String, String> redisUtilForRefreshToken;
+
 
     private final static int TIMEOUT = 14;
     private final static TimeUnit TIME_UNIT = TimeUnit.DAYS;
 
 
+
     //회원가입
     public void signin(SigninDto signinDto){
+
 
         //아이디(이메일) 중복 방지
         User user=userRepository.findByEmail(signinDto.getEmail());
@@ -102,7 +106,7 @@ public class AuthService {
 
         //토큰 생성
         String payload = String.valueOf(user.getId());
-        String accessToken = jwtTokenProvider.createToken(payload);
+        String accessToken = accessTokenUtil.createToken(payload);
 
         //기존에 refreshToken이 있었는지 확인 후 삭제
         Optional<String> refreshTokenId = redisUtilForUserId.findById(user.getId().toString());
