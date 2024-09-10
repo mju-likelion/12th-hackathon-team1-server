@@ -37,9 +37,8 @@ public class AuthService {
     private final PasswordHashEncryption passwordHashEncryption;
     private final JwtTokenProvider jwtTokenProvider;
     private final RecipeLikeRepository recipeLikeRepository;
-    private final S3Uploader s3Uploader;
     private final ImageRepository imageRepository;
-    private final RecipeRepository recipeRepository;
+    private final ImageService imageService;
 
     private final RedisUtil<String, RefreshToken> redisUtilForRefreshToken;
     private final RedisUtil<String, String> redisUtilForUserId;
@@ -67,14 +66,7 @@ public class AuthService {
     public void leave(User user){
         //레시피를 삭제하기 전, 유저의 레시피 내 이미지를 S3에서 모두 삭제
         if(user.getRecipes()!=null){
-            List<Recipe> recipes = findAllRecipesByUser(user);
-
-            recipes.forEach(recipe-> {
-                if(recipe.isContainingImage()){
-                    Image image = findImageByRecipe(recipe);
-                    s3Uploader.removeS3FileByUrl(image.getUrl());
-                }
-            });
+            imageService.deleteAllImagesOfUser(user);
         }
         //탈퇴
         userRepository.delete(user);
@@ -184,15 +176,5 @@ public class AuthService {
 
     private Image findImageByRecipe(Recipe recipe){
         return imageRepository.findByRecipe(recipe).orElseThrow(()->new NotFoundException(ErrorCode.IMAGE_NOT_FOUND));
-    }
-
-    private List<Recipe> findAllRecipesByUser(User user){
-        return recipeRepository.findAllByUser(user).orElseThrow(()-> new NotFoundException(ErrorCode.RECIPE_NOT_FOUND));
-    }
-
-    private void checkEmailDuplicated(String email){
-        if(userRepository.existsByEmail(email)){
-            throw new ConflictException(ErrorCode.DUPLICATED_EMAIL);
-        }
     }
 }
