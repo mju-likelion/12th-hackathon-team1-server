@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @AllArgsConstructor
@@ -34,5 +35,11 @@ public class IngredientService {
             throw new NotFoundException(ErrorCode.INGREDIENT_NOT_FOUND);
         }
         return new IngredientListDto(ingredientDtoList);
+    }
+
+    //데이터베이스에서 재료id로 재료를 찾는 메서드
+    public Ingredient findIngredientById(UUID ingredientId){
+        return ingredientRepository.findById(ingredientId)
+                .orElseThrow(()-> new NotFoundException(ErrorCode.INGREDIENT_NOT_FOUND));
     }
 }
