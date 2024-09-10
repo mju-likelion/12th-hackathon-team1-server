@@ -109,22 +109,15 @@ public class AuthService {
         String accessToken = accessTokenUtil.createToken(payload);
 
         //기존에 refreshToken이 있었는지 확인 후 삭제
-        Optional<String> refreshTokenId = redisUtilForUserId.findById(user.getId().toString());
-        if(refreshTokenId.isPresent()){
-            redisUtilForRefreshToken.delete(refreshTokenId.get());
-            redisUtilForUserId.delete(user.getId().toString());
+        Optional<String> refreshToken = redisUtilForRefreshToken.findById(user.getId().toString());
+        if(refreshToken.isPresent()){
+            redisUtilForRefreshToken.delete(user.getId().toString());
         }
 
-        UUID newRefreshTokenId = UUID.randomUUID();
-        RefreshToken refreshToken = RefreshToken.builder()
-                .tokenId(newRefreshTokenId)
-                .userId(user.getId())
-                .build();
+        String newRefreshToken = refreshTokenUtil.createToken(payload);
+        redisUtilForRefreshToken.save(payload, newRefreshToken, TIMEOUT, TIME_UNIT);
 
-        redisUtilForRefreshToken.save(newRefreshTokenId.toString(), refreshToken, TIMEOUT, TIME_UNIT);
-        redisUtilForUserId.save(user.getId().toString(), newRefreshTokenId.toString(),TIMEOUT,TIME_UNIT);
-
-        return new TokenResponseDto(accessToken, refreshToken);
+        return new TokenResponseDto(accessToken, newRefreshToken);
     }
 
     // 좋아요 누른 레시피 목록 조회
