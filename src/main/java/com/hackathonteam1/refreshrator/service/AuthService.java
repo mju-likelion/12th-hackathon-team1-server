@@ -104,53 +104,9 @@ public class AuthService {
         return recipeListDto;
     }
 
-    @Transactional
-    public TokenResponseDto refresh(HttpServletRequest request){
-
-        Cookie[] cookies = request.getCookies();
-
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if (cookie.getName().equals("RefreshToken")) {
-                    RefreshToken refreshToken = findRefreshTokenByRefreshTokenId(UUID.fromString(cookie.getValue()));
-                    UUID userId = refreshToken.getUserId();
-                    String accessToken = jwtTokenProvider.createToken(userId.toString());
-
-                    //refreshToken Rotation을 위해 매번 재발급.
-                    //refreshToken을 위해 redis에는 <key:userId, value:refreshTokenId>와
-                    //<key:refreshTokenId, value:refreshToken>의 형태로 2개를 저장함
-                    redisUtilForRefreshToken.delete(refreshToken.getTokenId().toString());
-                    redisUtilForUserId.delete(userId.toString());
-
-                    UUID newRefreshTokenId = UUID.randomUUID();
-
-                    RefreshToken newRefreshToken = RefreshToken.builder()
-                            .tokenId(newRefreshTokenId)
-                            .userId(userId)
-                            .build();
-
-                    redisUtilForRefreshToken.save(newRefreshTokenId.toString(), newRefreshToken, TIMEOUT, TIME_UNIT);
-                    redisUtilForUserId.save(userId.toString(), newRefreshTokenId.toString(),TIMEOUT,TIME_UNIT);
-
-                    return new TokenResponseDto(accessToken, newRefreshToken);
-                }
-            }
-        }
-        throw new UnauthorizedException(ErrorCode.COOKIE_NOT_FOUND, "RefreshToken이 존재하지 않습니다.");
-    }
-
-    private RefreshToken findRefreshTokenByRefreshTokenId(UUID tokenId){
-        return redisUtilForRefreshToken.findById(tokenId.toString()).orElseThrow( () ->
-                new UnauthorizedException(ErrorCode.INVALID_TOKEN, "유효하지 않은 RefreshToken입니다."));
-    }
-
     private <T> void checkValidPage(Page<T> pages, int page){
         if(pages.getTotalPages() <= page && page != 0){
             throw new NotFoundException(ErrorCode.PAGE_NOT_FOUND);
         }
-    }
-
-    private Image findImageByRecipe(Recipe recipe){
-        return imageRepository.findByRecipe(recipe).orElseThrow(()->new NotFoundException(ErrorCode.IMAGE_NOT_FOUND));
     }
 }
