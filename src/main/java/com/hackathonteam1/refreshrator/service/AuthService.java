@@ -37,22 +37,11 @@ public class AuthService {
     private final FridgeRepository fridgeRepository;
     private final PasswordHashEncryption passwordHashEncryption;
     private final RecipeLikeRepository recipeLikeRepository;
-    private final ImageRepository imageRepository;
     private final ImageService imageService;
-    private final RefreshTokenUtil refreshTokenUtil;
-    private final AccessTokenUtil accessTokenUtil;
-
-    private final RedisUtil<String, String> redisUtilForRefreshToken;
-
-
-    private final static int TIMEOUT = 14;
-    private final static TimeUnit TIME_UNIT = TimeUnit.DAYS;
-
 
 
     //회원가입
     public void signin(SigninDto signinDto){
-
 
         //아이디(이메일) 중복 방지
         User user=userRepository.findByEmail(signinDto.getEmail());
@@ -90,7 +79,7 @@ public class AuthService {
     }
 
     //로그인
-    public TokenResponseDto login(LoginDto loginDto){
+    public UUID login(LoginDto loginDto){
 
         //아이디(이메일)검사
         User user=userRepository.findByEmail(loginDto.getEmail());
@@ -104,20 +93,7 @@ public class AuthService {
             throw new ForbiddenException(ErrorCode.INVALID_PASSWORD);
         }
 
-        //토큰 생성
-        String payload = String.valueOf(user.getId());
-        String accessToken = accessTokenUtil.createToken(payload);
-
-        //기존에 refreshToken이 있었는지 확인 후 삭제
-        Optional<String> refreshToken = redisUtilForRefreshToken.findById(user.getId().toString());
-        if(refreshToken.isPresent()){
-            redisUtilForRefreshToken.delete(user.getId().toString());
-        }
-
-        String newRefreshToken = refreshTokenUtil.createToken(payload);
-        redisUtilForRefreshToken.save(payload, newRefreshToken, TIMEOUT, TIME_UNIT);
-
-        return new TokenResponseDto(accessToken, newRefreshToken);
+        return user.getId();
     }
 
     // 좋아요 누른 레시피 목록 조회

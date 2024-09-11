@@ -66,26 +66,11 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<ResponseDto<Void>> login(@RequestBody @Valid LoginDto loginDto, HttpServletResponse response) {
 
-        TokenResponseDto tokenResponseDto = authService.login(loginDto);
-        String bearerToken = JwtEncoder.encodeJwtToken(tokenResponseDto.getAccessToken());
+        UUID userId = authService.login(loginDto);
+        CookiesResponse cookies = tokenService.issueTokenCookies(userId);
 
-        ResponseCookie cookie = ResponseCookie.from(AuthenticationExtractor.TOKEN_COOKIE_NAME, bearerToken)
-                .maxAge(Duration.ofMillis(1800000))
-                .path("/")
-                .httpOnly(true)
-                .sameSite("None").secure(true)
-                .build();
-        response.addHeader("set-cookie", cookie.toString());
-
-        ResponseCookie cookie_refresh = ResponseCookie.from("RefreshToken",tokenResponseDto.getRefreshToken().getTokenId().toString())
-                .maxAge(Duration.ofDays(14))
-                .path("/auth/refresh")
-                .httpOnly(true)
-                .sameSite("None")
-                .secure(true)
-                .build();
-
-        response.addHeader("set-cookie", cookie_refresh.toString());
+        response.addHeader("set-cookie", cookies.getAccessTokenCookie().toString());
+        response.addHeader("set-cookie", cookies.getRefreshTokenCookie().toString());
 
         return new ResponseEntity<>(ResponseDto.res(HttpStatus.OK, "로그인 완료"), HttpStatus.OK);
     }
