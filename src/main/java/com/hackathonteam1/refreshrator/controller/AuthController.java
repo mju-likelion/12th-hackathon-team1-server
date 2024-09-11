@@ -41,23 +41,10 @@ public class AuthController {
     @DeleteMapping("/leave")
     public ResponseEntity<ResponseDto<Void>> leave(@AuthenticatedUser User user,HttpServletResponse response) {
         authService.leave(user);
+        CookiesResponse cookiesResponse = tokenService.expiredTokenCookies();
 
-        ResponseCookie cookie = ResponseCookie.from("AccessToken", null)
-                .maxAge(0)
-                .path("/")
-                .httpOnly(true)
-                .sameSite("None").secure(true)
-                .build();
-        response.addHeader("set-cookie", cookie.toString());
-
-        ResponseCookie cookie_refresh = ResponseCookie.from("RefreshToken",null)
-                .maxAge(0)
-                .path("/auth/refresh")
-                .httpOnly(true)
-                .sameSite("None")
-                .secure(true)
-                .build();
-        response.addHeader("set-cookie", cookie_refresh.toString());
+        response.addHeader("set-cookie", cookiesResponse.getAccessTokenCookie().toString());
+        response.addHeader("set-cookie", cookiesResponse.getRefreshTokenCookie().toString());
 
         return new ResponseEntity<>(ResponseDto.res(HttpStatus.OK, "회원 탈퇴 완료"), HttpStatus.OK);
     }
@@ -78,22 +65,10 @@ public class AuthController {
     //로그아웃
     @PostMapping("/logout")
     public ResponseEntity<ResponseDto<Void>> logout(@AuthenticatedUser User user, final HttpServletResponse response) {
-        ResponseCookie cookie = ResponseCookie.from("AccessToken", null)
-                .maxAge(0)
-                .path("/")
-                .httpOnly(true)
-                .sameSite("None").secure(true)
-                .build();
-        response.addHeader("set-cookie", cookie.toString());
+        CookiesResponse cookiesResponse = tokenService.expiredTokenCookies();
 
-        ResponseCookie cookie_refresh = ResponseCookie.from("RefreshToken",null)
-                .maxAge(0)
-                .path("/auth/refresh")
-                .httpOnly(true)
-                .sameSite("None")
-                .secure(true)
-                .build();
-        response.addHeader("set-cookie", cookie_refresh.toString());
+        response.addHeader("set-cookie", cookiesResponse.getAccessTokenCookie().toString());
+        response.addHeader("set-cookie", cookiesResponse.getRefreshTokenCookie().toString());
 
         return new ResponseEntity<>(ResponseDto.res(HttpStatus.OK, "로그아웃 완료"), HttpStatus.OK);
     }
