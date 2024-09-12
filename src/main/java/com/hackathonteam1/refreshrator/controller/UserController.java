@@ -5,6 +5,9 @@ import com.hackathonteam1.refreshrator.dto.ResponseDto;
 import com.hackathonteam1.refreshrator.dto.response.recipe.RecipeListDto;
 import com.hackathonteam1.refreshrator.entity.User;
 import com.hackathonteam1.refreshrator.service.RecipeService;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,8 +26,8 @@ public class UserController {
     @GetMapping("/me/recipes")
     public ResponseEntity<ResponseDto<RecipeListDto>> getMyRecipe(@AuthenticatedUser User user,
                                                                   @RequestParam(name = "type", defaultValue = "newest") String type,
-                                                                  @RequestParam(name = "page", defaultValue = "0") int page,
-                                                                  @RequestParam(name = "size", defaultValue = "10") int size){
+                                                                  @Min(0) @RequestParam(name = "page", defaultValue = "0") int page,
+                                                                  @Min(1) @Max(0) @RequestParam(name = "size", defaultValue = "10") int size){
         RecipeListDto recipeListDto = recipeService.findMyRecipes(user, type, page, size);
         return new ResponseEntity<>(ResponseDto.res(HttpStatus.OK, "자신이 작성한 레시피 목록 조회 성공", recipeListDto),HttpStatus.OK);
     }
@@ -32,8 +35,8 @@ public class UserController {
     // 좋아요 누른 레시피 목록 조회
     @GetMapping("/me/likes")
     public ResponseEntity<ResponseDto<RecipeListDto>> showAllRecipeLikes(@AuthenticatedUser User user,
-                                                                         @RequestParam(name = "page", defaultValue = "0")int page,
-                                                                         @RequestParam(name = "size", defaultValue = "10")int size) {
+                                                                         @Min(0) @RequestParam(name = "page", defaultValue = "0")int page,
+                                                                         @Min(1) @Max(0) @RequestParam(name = "size", defaultValue = "10")int size) {
         RecipeListDto recipeListDto = recipeService.showAllLikedRecipes(user, page, size);
         return new ResponseEntity<>(ResponseDto.res(HttpStatus.OK, "좋아요 누른 레시피 목록 조회 성공", recipeListDto), HttpStatus.OK);
     }
