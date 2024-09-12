@@ -250,9 +250,6 @@ public class RecipeServiceImpl implements RecipeService{
 
     // 좋아요 누른 레시피 목록 조회
     public RecipeListDto showAllLikedRecipes(User user, int page, int size) {
-        List<RecipeDto> recipeLists = new ArrayList<>();
-
-        Sort sort = Sort.by(Sort.Order.desc("createdAt"));
 
         Pageable pageable = PageRequest.of(page, size);
 

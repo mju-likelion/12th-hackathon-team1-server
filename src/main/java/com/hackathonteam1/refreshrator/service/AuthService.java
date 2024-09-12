@@ -150,12 +150,6 @@ public class AuthService {
                 new UnauthorizedException(ErrorCode.INVALID_TOKEN, "유효하지 않은 RefreshToken입니다."));
     }
 
-    private <T> void checkValidPage(Page<T> pages, int page){
-        if(pages.getTotalPages() <= page && page != 0){
-            throw new NotFoundException(ErrorCode.PAGE_NOT_FOUND);
-        }
-    }
-
     private Image findImageByRecipe(Recipe recipe){
         return imageRepository.findByRecipe(recipe).orElseThrow(()->new NotFoundException(ErrorCode.IMAGE_NOT_FOUND));
     }
