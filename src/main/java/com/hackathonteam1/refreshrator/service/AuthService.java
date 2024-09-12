@@ -9,13 +9,11 @@ import com.hackathonteam1.refreshrator.dto.response.recipe.RecipeDto;
 import com.hackathonteam1.refreshrator.dto.response.recipe.RecipeListDto;
 import com.hackathonteam1.refreshrator.entity.*;
 import com.hackathonteam1.refreshrator.exception.ConflictException;
-import com.hackathonteam1.refreshrator.exception.ForbiddenException;
 import com.hackathonteam1.refreshrator.exception.NotFoundException;
 import com.hackathonteam1.refreshrator.exception.UnauthorizedException;
 import com.hackathonteam1.refreshrator.exception.errorcode.ErrorCode;
 import com.hackathonteam1.refreshrator.repository.*;
 import com.hackathonteam1.refreshrator.util.RedisUtil;
-import com.hackathonteam1.refreshrator.util.S3Uploader;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
@@ -33,7 +31,6 @@ import java.util.stream.Collectors;
 @Slf4j
 public class AuthService {
     private final UserRepository userRepository;
-    private final FridgeRepository fridgeRepository;
     private final PasswordHashEncryption passwordHashEncryption;
     private final JwtTokenProvider jwtTokenProvider;
     private final RecipeLikeRepository recipeLikeRepository;
@@ -45,6 +42,7 @@ public class AuthService {
 
     private final static int TIMEOUT = 14;
     private final static TimeUnit TIME_UNIT = TimeUnit.DAYS;
+    private final UserService userService;
 
 
     //회원가입
@@ -76,16 +74,10 @@ public class AuthService {
     public TokenResponseDto login(LoginDto loginDto){
 
         //아이디(이메일)검사
-        User user=userRepository.findByEmail(loginDto.getEmail());
+        User user=userService.checkUserByEmail(loginDto.getEmail());
 
-        if(user==null){
-            throw new NotFoundException(ErrorCode.USERID_NOT_FOUND);
-        }
-
-        //비밀번호가 입력한 아이디에 일치하는지 검사
-        if(!passwordHashEncryption.matches(loginDto.getPassword(), user.getPassword())){
-            throw new ForbiddenException(ErrorCode.INVALID_PASSWORD);
-        }
+        ////비밀번호가 입력한 아이디(이메일)에 일치하는지 검사
+        userService.checkPassword(loginDto.getPassword(), user.getPassword());
 
         //토큰 생성
         String payload = String.valueOf(user.getId());
