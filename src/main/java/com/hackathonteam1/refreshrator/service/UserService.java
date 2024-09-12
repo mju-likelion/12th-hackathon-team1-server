@@ -15,11 +15,12 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordHashEncryption passwordHashEncryption;
 
-    //재료를 등록한 유저인지 확인
-    public void checkAuth(User writer, User user){
+    //레시피 or 재료를 등록한 유저인지 확인
+    public Boolean isAuthorized(User writer, User user){
         if(!writer.getId().equals(user.getId())){
-            throw new ForbiddenException(ErrorCode.FRIDGE_ITEM_FORBIDDEN);
+            return false;
         }
+        return true;
     }
 
     //로그인을 위한 아이디(이메일) 검사
