@@ -29,5 +29,14 @@ public class UserController {
         return new ResponseEntity<>(ResponseDto.res(HttpStatus.OK, "자신이 작성한 레시피 목록 조회 성공", recipeListDto),HttpStatus.OK);
     }
 
+    // 좋아요 누른 레시피 목록 조회
+    @GetMapping("/me/likes")
+    public ResponseEntity<ResponseDto<RecipeListDto>> showAllRecipeLikes(@AuthenticatedUser User user,
+                                                                         @RequestParam(name = "page", defaultValue = "0")int page,
+                                                                         @RequestParam(name = "size", defaultValue = "10")int size) {
+        RecipeListDto recipeListDto = recipeService.showAllLikedRecipes(user, page, size);
+        return new ResponseEntity<>(ResponseDto.res(HttpStatus.OK, "좋아요 누른 레시피 목록 조회 성공", recipeListDto), HttpStatus.OK);
+    }
+
 
 }

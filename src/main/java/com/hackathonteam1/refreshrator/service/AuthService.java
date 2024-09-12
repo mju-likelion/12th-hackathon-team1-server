@@ -110,24 +110,6 @@ public class AuthService {
         return new TokenResponseDto(accessToken, refreshToken);
     }
 
-    // 좋아요 누른 레시피 목록 조회
-    public RecipeListDto showAllRecipeLikes(User user, int page, int size) {
-        List<RecipeDto> recipeLists = new ArrayList<>();
-
-        Sort sort = Sort.by(Sort.Order.desc("createdAt"));
-
-        Pageable pageable = PageRequest.of(page, size);
-
-        Page<RecipeLike> recipeLikes = this.recipeLikeRepository.findAllByUser(user, pageable);
-        List<Recipe> recipes = recipeLikes.stream().map(like -> like.getRecipe()).collect(Collectors.toList());
-        Page<Recipe> recipePage = new PageImpl<>(recipes);
-
-        checkValidPage(recipePage, page);
-
-        RecipeListDto recipeListDto = RecipeListDto.mapping(recipePage);
-        return recipeListDto;
-    }
-
     @Transactional
     public TokenResponseDto refresh(HttpServletRequest request){
 

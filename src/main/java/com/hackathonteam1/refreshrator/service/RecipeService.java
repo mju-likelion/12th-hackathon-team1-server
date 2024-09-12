@@ -49,4 +49,7 @@ public interface RecipeService {
     //자신이 작성한 레시피 조회
     public RecipeListDto findMyRecipes(User user, String type, int page, int size);
 
+    //
+    public RecipeListDto showAllLikedRecipes(User user, int page, int size);
+
 }

@@ -5,6 +5,7 @@ import com.hackathonteam1.refreshrator.dto.request.recipe.RegisterIngredientReci
 import com.hackathonteam1.refreshrator.dto.request.recipe.ModifyRecipeDto;
 import com.hackathonteam1.refreshrator.dto.request.recipe.RegisterRecipeDto;
 import com.hackathonteam1.refreshrator.dto.response.recipe.DetailRecipeDto;
+import com.hackathonteam1.refreshrator.dto.response.recipe.RecipeDto;
 import com.hackathonteam1.refreshrator.entity.*;
 
 import com.hackathonteam1.refreshrator.dto.response.recipe.RecipeListDto;
@@ -31,10 +32,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -249,6 +247,25 @@ public class RecipeServiceImpl implements RecipeService{
 
         return recipeListDto;
     }
+
+    // 좋아요 누른 레시피 목록 조회
+    public RecipeListDto showAllLikedRecipes(User user, int page, int size) {
+        List<RecipeDto> recipeLists = new ArrayList<>();
+
+        Sort sort = Sort.by(Sort.Order.desc("createdAt"));
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<RecipeLike> recipeLikes = this.recipeLikeRepository.findAllByUser(user, pageable);
+        List<Recipe> recipes = recipeLikes.stream().map(like -> like.getRecipe()).collect(Collectors.toList());
+        Page<Recipe> recipePage = new PageImpl<>(recipes);
+
+        checkValidPage(recipePage, page);
+
+        RecipeListDto recipeListDto = RecipeListDto.mapping(recipePage);
+        return recipeListDto;
+    }
+
 
     private Fridge findFridgeByUser(User user){
         return fridgeRepository.findByUser(user).orElseThrow(()-> new NotFoundException(ErrorCode.FRIDGE_NOT_FOUND));
