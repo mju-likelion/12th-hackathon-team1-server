@@ -27,7 +27,7 @@ public class UserService {
         User user=userRepository.findByEmail(email);
 
         if(user==null){
-            throw new NotFoundException(ErrorCode.USERID_NOT_FOUND);
+            throw new NotFoundException(ErrorCode.USER_NOT_FOUND);
         }
 
         return user;
