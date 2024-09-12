@@ -8,7 +8,6 @@ import com.hackathonteam1.refreshrator.entity.Fridge;
 import com.hackathonteam1.refreshrator.entity.FridgeItem;
 import com.hackathonteam1.refreshrator.entity.Ingredient;
 import com.hackathonteam1.refreshrator.entity.User;
-import com.hackathonteam1.refreshrator.exception.ForbiddenException;
 import com.hackathonteam1.refreshrator.exception.NotFoundException;
 import com.hackathonteam1.refreshrator.exception.errorcode.ErrorCode;
 import com.hackathonteam1.refreshrator.repository.FridgeItemRepository;
@@ -18,7 +17,6 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -29,6 +27,7 @@ public class FridgeService {
     private FridgeItemRepository fridgeItemRepository;
     private FridgeRepository fridgeRepository;
     private IngredientService ingredientService;
+    private UserService userService;
 
     //냉장고에 재료 추가
     @CacheEvict(value = "userIngredientsCache", key = "#user.getId()", cacheManager = "redisCacheManager")
@@ -62,7 +61,7 @@ public class FridgeService {
         FridgeItem fridgeItem=findFridgeItem(fridgeItemId);
 
         //유저가 등록한 재료인지 검사
-        checkAuth(fridgeItem.getFridge().getUser(),user);
+        userService.checkAuth(fridgeItem.getFridge().getUser(),user);
 
         //수정하기
         fridgeItem.setExpiredDate(addFridgeDto.getExpiredDate());
@@ -81,7 +80,7 @@ public class FridgeService {
         FridgeItem fridgeItem=findFridgeItem(fridgeItemId);
 
         //권한 확인
-        checkAuth(fridgeItem.getFridge().getUser(),user);
+        userService.checkAuth(fridgeItem.getFridge().getUser(),user);
 
         //삭제하기
         fridgeItemRepository.delete(fridgeItem);
@@ -127,7 +126,7 @@ public class FridgeService {
         FridgeItem fridgeItem=findFridgeItem(fridgeItemId);
 
         //권한 확인
-        checkAuth(fridgeItem.getFridge().getUser(),user);
+        userService.checkAuth(fridgeItem.getFridge().getUser(),user);
 
         //조회 하기
         return FridgeItemResponseData.fromFridgeItem(fridgeItem);
@@ -143,12 +142,5 @@ public class FridgeService {
     private FridgeItem findFridgeItem(UUID id){
         return fridgeItemRepository.findById(id)
                 .orElseThrow(()-> new NotFoundException(ErrorCode.FRIDGE_ITEM_NOT_FOUND));
-    }
-
-    //권한 확인
-    private void checkAuth(User writer, User user){
-        if(!writer.getId().equals(user.getId())){
-            throw new ForbiddenException(ErrorCode.FRIDGE_ITEM_FORBIDDEN);
-        }
     }
 }
