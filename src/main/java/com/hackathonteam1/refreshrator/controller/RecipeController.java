@@ -11,6 +11,7 @@ import com.hackathonteam1.refreshrator.dto.response.recipe.DetailRecipeDto;
 import com.hackathonteam1.refreshrator.dto.response.recipe.RecipeListDto;
 import com.hackathonteam1.refreshrator.entity.User;
 import com.hackathonteam1.refreshrator.service.ImageService;
+import com.hackathonteam1.refreshrator.service.IngredientRecipeServiceImpl;
 import com.hackathonteam1.refreshrator.service.RecipeService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
@@ -30,6 +31,7 @@ import java.util.UUID;
 public class RecipeController {
     private final RecipeService recipeService;
     private final ImageService imageService;
+    private final IngredientRecipeServiceImpl ingredientRecipeServiceImpl;
 
     @GetMapping
     public ResponseEntity<ResponseDto<RecipeListDto>> getList(@RequestParam(name = "keyword",defaultValue = "")String keyword,
@@ -69,14 +71,14 @@ public class RecipeController {
     @PostMapping("/{recipe_id}/ingredients")
     public ResponseEntity<ResponseDto<Void>> registerIngredientRecipe(@PathVariable("recipe_id") UUID recipeId,
                                                                       @RequestBody @Valid RegisterIngredientRecipesDto registerIngredientRecipesDto, @AuthenticatedUser User user){
-        recipeService.registerIngredientRecipe(user, recipeId, registerIngredientRecipesDto);
+        ingredientRecipeServiceImpl.registerIngredientRecipe(user, recipeId, registerIngredientRecipesDto);
         return new ResponseEntity<>(ResponseDto.res(HttpStatus.CREATED, "레시피 재료 등록 성공"),HttpStatus.CREATED);
     }
 
     @DeleteMapping("/{recipe_id}/ingredients")
     public ResponseEntity<ResponseDto<Void>> deleteIngredientRecipe(@PathVariable("recipe_id") UUID recipeId,
                                                                     @RequestBody @Valid DeleteIngredientRecipesDto deleteIngredientRecipesDto, @AuthenticatedUser User user){
-        recipeService.deleteIngredientRecipe(user, recipeId, deleteIngredientRecipesDto);
+        ingredientRecipeServiceImpl.deleteIngredientRecipe(user, recipeId, deleteIngredientRecipesDto);
         return new ResponseEntity<>(ResponseDto.res(HttpStatus.OK, "레시피 재료 삭제 성공"),HttpStatus.OK);
     }
 

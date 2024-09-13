@@ -31,11 +31,6 @@ public interface RecipeService {
     //레시피 삭제
     public void delete(UUID recipeId, User user);
 
-    //레시피 재료 추가
-    public void registerIngredientRecipe(User user, UUID recipeId, RegisterIngredientRecipesDto registerIngredientRecipesDto);
-
-    //레시피 재료 삭제
-    public void deleteIngredientRecipe(User user, UUID recipeId, DeleteIngredientRecipesDto deleteIngredientRecipesDto);
 
     //추천 레시피 목록 조회
     public RecipeListDto getRecommendation(int page, int size, int match, String type, User user);
@@ -49,7 +44,9 @@ public interface RecipeService {
     //자신이 작성한 레시피 조회
     public RecipeListDto findMyRecipes(User user, String type, int page, int size);
 
-    //
+    //좋아요 누른 레시피 목록 조회
     public RecipeListDto showAllLikedRecipes(User user, int page, int size);
+
+    public Recipe findRecipeById(UUID recipeId);
 
 }
