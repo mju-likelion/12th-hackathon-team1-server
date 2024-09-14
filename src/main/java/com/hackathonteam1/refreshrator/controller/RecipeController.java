@@ -2,13 +2,11 @@ package com.hackathonteam1.refreshrator.controller;
 
 import com.hackathonteam1.refreshrator.annotation.AuthenticatedUser;
 import com.hackathonteam1.refreshrator.dto.ResponseDto;
-import com.hackathonteam1.refreshrator.dto.request.recipe.DeleteIngredientRecipesDto;
-import com.hackathonteam1.refreshrator.dto.request.recipe.RegisterIngredientRecipesDto;
-import com.hackathonteam1.refreshrator.dto.request.recipe.ModifyRecipeDto;
-import com.hackathonteam1.refreshrator.dto.request.recipe.RegisterRecipeDto;
+import com.hackathonteam1.refreshrator.dto.request.recipe.*;
 import com.hackathonteam1.refreshrator.dto.response.file.ImageDto;
 import com.hackathonteam1.refreshrator.dto.response.recipe.DetailRecipeDto;
 import com.hackathonteam1.refreshrator.dto.response.recipe.RecipeListDto;
+import com.hackathonteam1.refreshrator.dto.response.recipeLike.RecipeLikedDataList;
 import com.hackathonteam1.refreshrator.entity.User;
 import com.hackathonteam1.refreshrator.service.ImageService;
 import com.hackathonteam1.refreshrator.service.RecipeService;
@@ -118,6 +116,13 @@ public class RecipeController {
         imageService.deleteImage(image_Id, user);
         return new ResponseEntity<>(ResponseDto.res(HttpStatus.OK, "이미지 삭제 성공"),HttpStatus.OK);
 
+    }
+
+    @PostMapping("/likes")
+    public ResponseEntity<ResponseDto<RecipeLikedDataList>> getRecipesLiked(
+            @RequestBody RecipeIdListDto recipeIdListDto, @AuthenticatedUser User user){
+        RecipeLikedDataList recipeLikedDataList = recipeService.getRecipesLiked(recipeIdListDto ,user);
+        return new ResponseEntity<>(ResponseDto.res(HttpStatus.OK, "좋아요 여부 조회 성공", recipeLikedDataList), HttpStatus.OK);
     }
 
 }
