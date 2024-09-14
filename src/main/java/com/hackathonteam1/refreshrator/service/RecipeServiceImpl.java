@@ -1,10 +1,9 @@
 package com.hackathonteam1.refreshrator.service;
 
-import com.hackathonteam1.refreshrator.dto.request.recipe.DeleteIngredientRecipesDto;
-import com.hackathonteam1.refreshrator.dto.request.recipe.ModifyRecipeDto;
-import com.hackathonteam1.refreshrator.dto.request.recipe.RegisterIngredientRecipesDto;
-import com.hackathonteam1.refreshrator.dto.request.recipe.RegisterRecipeDto;
+import com.hackathonteam1.refreshrator.dto.request.recipe.*;
 import com.hackathonteam1.refreshrator.dto.response.recipe.DetailRecipeDto;
+import com.hackathonteam1.refreshrator.dto.response.recipeLike.RecipeLikedData;
+import com.hackathonteam1.refreshrator.dto.response.recipeLike.RecipeLikedDataList;
 import com.hackathonteam1.refreshrator.entity.*;
 
 import com.hackathonteam1.refreshrator.dto.response.recipe.RecipeListDto;
@@ -332,6 +331,14 @@ public class RecipeServiceImpl implements RecipeService{
 
     public Recipe findRecipeById(UUID recipeId){
         return recipeRepository.findById(recipeId).orElseThrow(()-> new NotFoundException(ErrorCode.RECIPE_NOT_FOUND));
+    }
+
+    //레시피 목록에 대해 유저의 좋아요 여부를 반환하는 메서드
+    @Override
+    public RecipeLikedDataList getRecipesLiked(RecipeIdListDto recipeIdListDto, User user){
+        return RecipeLikedDataList.of(recipeIdListDto.getRecipeIds().stream().map(recipeId ->
+                RecipeLikedData.of(recipeId, recipeLikeRepository.existsByRecipeIdAndUser(recipeId, user))) //레시피 하나당 쿼리를 하나씩 사용함...
+                .collect(Collectors.toList()));
     }
 
     //Recipe로 해당 Recipe 내에 존재하는 IngredientRecipe 리스트를 반환하는 메서드

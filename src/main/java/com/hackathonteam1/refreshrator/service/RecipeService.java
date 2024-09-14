@@ -1,13 +1,11 @@
 package com.hackathonteam1.refreshrator.service;
 
-import com.hackathonteam1.refreshrator.dto.request.recipe.DeleteIngredientRecipesDto;
-import com.hackathonteam1.refreshrator.dto.request.recipe.RegisterIngredientRecipesDto;
-import com.hackathonteam1.refreshrator.dto.request.recipe.ModifyRecipeDto;
-import com.hackathonteam1.refreshrator.dto.request.recipe.RegisterRecipeDto;
+import com.hackathonteam1.refreshrator.dto.request.recipe.*;
 import com.hackathonteam1.refreshrator.dto.response.file.ImageDto;
 import com.hackathonteam1.refreshrator.dto.response.recipe.DetailRecipeDto;
 
 import com.hackathonteam1.refreshrator.dto.response.recipe.RecipeListDto;
+import com.hackathonteam1.refreshrator.dto.response.recipeLike.RecipeLikedDataList;
 import com.hackathonteam1.refreshrator.entity.Recipe;
 import com.hackathonteam1.refreshrator.entity.User;
 import org.springframework.web.multipart.MultipartFile;
@@ -54,4 +52,7 @@ public interface RecipeService {
 
     //레시피에서 재료 삭제
     public void deleteIngredientRecipe(User user, UUID recipeId, DeleteIngredientRecipesDto deleteIngredientRecipesDto);
+
+    //레시피 목록에 대한 좋아요 여부 반환
+    public RecipeLikedDataList getRecipesLiked(RecipeIdListDto recipeIdListDto, User user);
 }
