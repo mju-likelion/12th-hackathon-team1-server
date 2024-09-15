@@ -73,30 +73,6 @@ public class AuthService {
         return user.getId();
     }
 
-    // 좋아요 누른 레시피 목록 조회
-    public RecipeListDto showAllRecipeLikes(User user, int page, int size) {
-        List<RecipeDto> recipeLists = new ArrayList<>();
-
-        Sort sort = Sort.by(Sort.Order.desc("createdAt"));
-
-        Pageable pageable = PageRequest.of(page, size);
-
-        Page<RecipeLike> recipeLikes = this.recipeLikeRepository.findAllByUser(user, pageable);
-        List<Recipe> recipes = recipeLikes.stream().map(like -> like.getRecipe()).collect(Collectors.toList());
-        Page<Recipe> recipePage = new PageImpl<>(recipes);
-
-        checkValidPage(recipePage, page);
-
-        RecipeListDto recipeListDto = RecipeListDto.mapping(recipePage);
-        return recipeListDto;
-    }
-
-    private <T> void checkValidPage(Page<T> pages, int page){
-        if(pages.getTotalPages() <= page && page != 0){
-            throw new NotFoundException(ErrorCode.PAGE_NOT_FOUND);
-        }
-    }
-
     private void checkEmailDuplicated(String email){
         if(userRepository.existsByEmail(email)){
             throw new ConflictException(ErrorCode.DUPLICATED_EMAIL);

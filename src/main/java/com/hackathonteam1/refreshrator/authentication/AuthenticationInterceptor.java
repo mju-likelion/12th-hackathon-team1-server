@@ -28,7 +28,7 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
     private final AccessTokenUtil accessTokenUtil;
 
     public static final String TOKEN_COOKIE_NAME = "AccessToken";
-    private final static Set<String> EXCLUDE_RECIPES_PATTENS = new HashSet<>(Arrays.asList("/recipes/recommendations"));
+    private final static Set<String> EXCLUDE_RECIPES_PATTENS = new HashSet<>(Arrays.asList("/recipes/recommendations", "/recipes/likes"));
 
     @Override
     public boolean preHandle(final HttpServletRequest request,

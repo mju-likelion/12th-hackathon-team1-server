@@ -71,15 +71,6 @@ public class AuthController {
         return new ResponseEntity<>(ResponseDto.res(HttpStatus.OK, "로그아웃 완료"), HttpStatus.OK);
     }
 
-    // 좋아요 누른 레시피 목록 조회
-    @GetMapping("/likes")
-    public ResponseEntity<ResponseDto<RecipeListDto>> showAllRecipeLikes(@AuthenticatedUser User user,
-                                                                         @RequestParam(name = "page", defaultValue = "0")int page,
-                                                                         @RequestParam(name = "size", defaultValue = "10")int size) {
-        RecipeListDto recipeListDto = authService.showAllRecipeLikes(user, page, size);
-        return new ResponseEntity<>(ResponseDto.res(HttpStatus.OK, "좋아요 누른 레시피 목록 조회 성공", recipeListDto), HttpStatus.OK);
-    }
-
     @GetMapping("/refresh")
     public ResponseEntity<ResponseDto<Void>> refresh(HttpServletRequest request, HttpServletResponse response){
 
