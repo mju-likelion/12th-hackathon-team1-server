@@ -7,22 +7,18 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
-@Component
 public class JwtTokenProvider {
 
     private final SecretKey key;
     private final long validityInMilliseconds;
 
     //생성자
-    public JwtTokenProvider(@Value("${security.jwt.token.secret-key}") final String secretKey,
-                            @Value("${security.jwt.token.expire-length}") final long validityInMilliseconds) {
+    public JwtTokenProvider(String secretKey, long validityInMilliseconds) {
         this.key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
         this.validityInMilliseconds = validityInMilliseconds;
     }
@@ -31,7 +27,6 @@ public class JwtTokenProvider {
     public String createToken(final String payload) {
         Date now = new Date();
         Date expiration = new Date(now.getTime() + validityInMilliseconds);
-
         return Jwts.builder()
                 .setSubject(payload)    //userid
                 .setIssuedAt(now)       //발급 시간
