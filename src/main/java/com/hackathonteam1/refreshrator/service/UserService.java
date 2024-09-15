@@ -6,6 +6,7 @@ import com.hackathonteam1.refreshrator.exception.ForbiddenException;
 import com.hackathonteam1.refreshrator.exception.NotFoundException;
 import com.hackathonteam1.refreshrator.exception.errorcode.ErrorCode;
 import com.hackathonteam1.refreshrator.repository.UserRepository;
+
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -41,3 +42,12 @@ public class UserService {
         }
     }
 }
+
+    //재료를 등록한 유저인지 확인
+    public void checkAuth(User writer, User user){
+        if(!writer.getId().equals(user.getId())){
+            throw new ForbiddenException(ErrorCode.FRIDGE_ITEM_FORBIDDEN);
+        }
+    }
+}
+
