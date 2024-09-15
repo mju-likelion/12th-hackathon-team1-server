@@ -13,7 +13,6 @@ import com.hackathonteam1.refreshrator.exception.NotFoundException;
 import com.hackathonteam1.refreshrator.exception.errorcode.ErrorCode;
 import com.hackathonteam1.refreshrator.repository.FridgeItemRepository;
 import com.hackathonteam1.refreshrator.repository.FridgeRepository;
-import com.hackathonteam1.refreshrator.repository.IngredientRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -27,16 +26,16 @@ import java.util.UUID;
 @Service
 @AllArgsConstructor
 public class FridgeService {
-    private IngredientRepository ingredientRepository;
     private FridgeItemRepository fridgeItemRepository;
     private FridgeRepository fridgeRepository;
+    private IngredientService ingredientService;
 
     //냉장고에 재료 추가
     @CacheEvict(value = "userIngredientsCache", key = "#user.getId()", cacheManager = "redisCacheManager")
     public void addIngredientInFridge(AddFridgeDto addFridgeDto, User user){
 
         //재료 찾기
-        Ingredient ingredient=findIngredient(addFridgeDto);
+        Ingredient ingredient=ingredientService.findIngredientById(addFridgeDto.getIngredientId());
 
         //냉장고 찾기
         Fridge fridge=findFridge(user);
@@ -47,7 +46,7 @@ public class FridgeService {
                 .ingredient(ingredient)
                 .expiredDate(addFridgeDto.getExpiredDate())
                 .quantity(addFridgeDto.getQuantity())
-                .storage(defindStorage(addFridgeDto.getStorage()))
+                .storage(FridgeItem.of(addFridgeDto.getStorage()))
                 .memo(addFridgeDto.getMemo())
                 .build();
 
@@ -68,7 +67,7 @@ public class FridgeService {
         //수정하기
         fridgeItem.setExpiredDate(addFridgeDto.getExpiredDate());
         fridgeItem.setQuantity(addFridgeDto.getQuantity());
-        fridgeItem.setStorage(defindStorage(addFridgeDto.getStorage()));
+        fridgeItem.setStorage(FridgeItem.of(addFridgeDto.getStorage()));
         fridgeItem.setMemo(addFridgeDto.getMemo());
 
         //저장하기
@@ -92,40 +91,34 @@ public class FridgeService {
     @Cacheable(value = "userIngredientsCache",key = "#user.getId()", cacheManager = "redisCacheManager")
     public FridgeItemListDto getIngredientsInFridge(User user) {
         // 유저의 냉장고 찾기
-        Fridge fridge = findFridge(user);
-
-        // 권힌 확인
-        checkAuth(fridge.getUser(),user);
+        Fridge fridge = findFridge(user); // user를 통해 fridge를 반환
 
         List<FridgeItemDto> coldStorageList = new ArrayList<>(); // 냉장 재료 리스트
         List<FridgeItemDto> frozenStorageList = new ArrayList<>(); // 냉동 재료 리스트
         List<FridgeItemDto> ambientStorageList = new ArrayList<>(); // 실온 재료 리스트
         List<FridgeItemDto> expirationDateList = new ArrayList<>(); // 유통 기한 만료 재료 리스트
 
-        for(FridgeItem fridgeItem : fridge.getFridgeItem()){
-            FridgeItemDto fridgeItemDto = FridgeItemDto.builder()
-                    .id(fridgeItem.getId())
-                    .ingredientId(fridgeItem.getIngredient().getId())
-                    .ingredientName(fridgeItem.getIngredient().getName())
-                    .expirationDate(fridgeItem.getExpiredDate())
-                    .build();
+        setIngredientsInFridgeList(fridge.getFridgeItem(), coldStorageList, frozenStorageList, ambientStorageList, expirationDateList);
 
-            if(LocalDate.now().isAfter(fridgeItem.getExpiredDate())){
-                // 유통 기한 만료 재료
-                expirationDateList.add(fridgeItemDto);
-            } else if(fridgeItem.getStorage().equals(FridgeItem.Storage.STORE_AT_ROOM_TEMPERATURE)){
-                // 실온 보관인 경우
-                ambientStorageList.add(fridgeItemDto);
-            } else if(fridgeItem.getStorage().equals(FridgeItem.Storage.REFRIGERATED)){
-                // 냉장 보관인 경우
-                coldStorageList.add(fridgeItemDto);
-            } else if(fridgeItem.getStorage().equals(FridgeItem.Storage.FROZEN)){
-                // 냉동 보관인 경우
-                frozenStorageList.add(fridgeItemDto);
+        return new FridgeItemListDto(coldStorageList, frozenStorageList, ambientStorageList, expirationDateList);
+    }
+
+    private void setIngredientsInFridgeList(List<FridgeItem> fridgeItems,
+                                            List<FridgeItemDto> coldStorageList,
+                                            List<FridgeItemDto> frozenStorageList,
+                                            List<FridgeItemDto> ambientStorageList,
+                                            List<FridgeItemDto> expirationDateList){
+        for(FridgeItem fridgeItem : fridgeItems){
+            FridgeItemDto fridgeItemDto = FridgeItemDto.changeToDto(fridgeItem);
+
+            switch (fridgeItem.getStorage()){
+                case STORE_AT_ROOM_TEMPERATURE -> ambientStorageList.add(fridgeItemDto);
+                case REFRIGERATED -> coldStorageList.add(fridgeItemDto);
+                case FROZEN -> frozenStorageList.add(fridgeItemDto);
+                default -> expirationDateList.add(fridgeItemDto);
             }
 
         }
-        return new FridgeItemListDto(coldStorageList, frozenStorageList, ambientStorageList, expirationDateList);
     }
 
     //냉장고에 있는 재료 단건 조회 메서드
@@ -138,22 +131,6 @@ public class FridgeService {
 
         //조회 하기
         return FridgeItemResponseData.fromFridgeItem(fridgeItem);
-    }
-
-
-    //저장방법 결정 메서드
-    private FridgeItem.Storage defindStorage(String storage){
-        return switch (storage){
-            case "상온"-> FridgeItem.Storage.STORE_AT_ROOM_TEMPERATURE;
-            case "냉동"-> FridgeItem.Storage.FROZEN;
-            default -> FridgeItem.Storage.REFRIGERATED;
-        };
-    }
-
-    //데이터베이스에서 재료id로 재료를 찾는 메서드
-    private Ingredient findIngredient(AddFridgeDto addFridgeDto){
-        return ingredientRepository.findById(addFridgeDto.getIngredientId())
-                .orElseThrow(()-> new NotFoundException(ErrorCode.INGREDIENT_NOT_FOUND));
     }
 
     //데이터베이스에서 유저의 냉장고를 찾는 메서드

@@ -18,6 +18,7 @@ public enum ErrorCode {
     FILE_TYPE_ERROR("4007", "유효하지 않은 파일 형식입니다."),
     NOT_IMAGE_OF_RECIPE("4008", "해당 레시피의 이미지 요청이 아닙니다."),
     SORT_TYPE_ERROR("4009", "정렬 타입이 유효하지 않습니다."),
+    STORAGE_ERROR("40010","저장 방법이 올바르지 않습니다."),
 
     //AuthorizedException
     COOKIE_NOT_FOUND("4010", "쿠키를 찾을 수 없습니다."),

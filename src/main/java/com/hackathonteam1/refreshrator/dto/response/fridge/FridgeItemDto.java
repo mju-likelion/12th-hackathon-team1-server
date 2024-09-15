@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
+import com.hackathonteam1.refreshrator.entity.FridgeItem;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -24,4 +25,13 @@ public class FridgeItemDto {
     @JsonDeserialize(using = LocalDateDeserializer.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate expirationDate;
+
+    public static FridgeItemDto changeToDto(FridgeItem fridgeItem){
+        return FridgeItemDto.builder()
+                .id(fridgeItem.getId())
+                .ingredientName(fridgeItem.getIngredient().getName())
+                .ingredientId(fridgeItem.getIngredient().getId())
+                .expirationDate(fridgeItem.getExpiredDate())
+                .build();
+    }
 }
