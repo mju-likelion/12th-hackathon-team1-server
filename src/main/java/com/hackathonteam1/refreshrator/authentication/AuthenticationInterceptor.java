@@ -5,6 +5,7 @@ import com.hackathonteam1.refreshrator.entity.User;
 import com.hackathonteam1.refreshrator.exception.UnauthorizedException;
 import com.hackathonteam1.refreshrator.exception.errorcode.ErrorCode;
 import com.hackathonteam1.refreshrator.repository.UserRepository;
+import com.hackathonteam1.refreshrator.util.AccessTokenUtil;
 import com.hackathonteam1.refreshrator.util.UriMatcher;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -22,10 +23,12 @@ import java.util.*;
 @Slf4j
 public class AuthenticationInterceptor implements HandlerInterceptor {
 
-    private final JwtTokenProvider jwtTokenProvider;
     private final AuthenticationContext authenticationContext;
     private final UserRepository userRepository;
-    private final static Set<String> EXCLUDE_RECIPES_PATTENS = new HashSet<>(Arrays.asList("/recipes/recommendations"));
+    private final AccessTokenUtil accessTokenUtil;
+
+    public static final String TOKEN_COOKIE_NAME = "AccessToken";
+    private final static Set<String> EXCLUDE_RECIPES_PATTENS = new HashSet<>(Arrays.asList("/recipes/recommendations", "/recipes/likes"));
 
     @Override
     public boolean preHandle(final HttpServletRequest request,
@@ -42,8 +45,8 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
         if(recipeListUriMatcher.match(request)) return true; //Request 경로가 UriMatcher와 일치한다면 통과.
         if(recipeDetailUriMatcher.matchWithExclusion(request, EXCLUDE_RECIPES_PATTENS)) return true; //Request 경로가 제외 패턴에 해당하지않고 UriMatcher와 일치한다면 통과.
 
-        String accessToken = AuthenticationExtractor.extract(request);
-        UUID userId = UUID.fromString(jwtTokenProvider.getPayload(accessToken));
+        String accessToken = AuthenticationExtractor.extract(request, TOKEN_COOKIE_NAME);
+        UUID userId = UUID.fromString(accessTokenUtil.getPayload(accessToken));
         User user = findExistingUser(userId);
         authenticationContext.setPrincipal(user);
         return true;

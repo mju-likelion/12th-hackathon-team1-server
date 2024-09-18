@@ -140,7 +140,7 @@ public class FridgeService {
     }
 
     //데이터베이스에서 유저의 냉장고를 찾는 메서드
-    private Fridge findFridge(User user){
+    public Fridge findFridge(User user){
         return fridgeRepository.findByUser(user)
                 .orElseThrow(()-> new NotFoundException(ErrorCode.FRIDGE_NOT_FOUND));
     }

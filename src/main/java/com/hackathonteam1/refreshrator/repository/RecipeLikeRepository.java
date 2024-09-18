@@ -14,4 +14,5 @@ import java.util.UUID;
 @Repository
 public interface RecipeLikeRepository extends JpaRepository<RecipeLike, UUID> {
     Page<RecipeLike> findAllByUser(User user, Pageable pageable);
+    boolean existsByRecipeIdAndUser(UUID recipeId, User user);
 }

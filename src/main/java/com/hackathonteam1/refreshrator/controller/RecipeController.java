@@ -2,17 +2,17 @@ package com.hackathonteam1.refreshrator.controller;
 
 import com.hackathonteam1.refreshrator.annotation.AuthenticatedUser;
 import com.hackathonteam1.refreshrator.dto.ResponseDto;
-import com.hackathonteam1.refreshrator.dto.request.recipe.DeleteIngredientRecipesDto;
-import com.hackathonteam1.refreshrator.dto.request.recipe.RegisterIngredientRecipesDto;
-import com.hackathonteam1.refreshrator.dto.request.recipe.ModifyRecipeDto;
-import com.hackathonteam1.refreshrator.dto.request.recipe.RegisterRecipeDto;
+import com.hackathonteam1.refreshrator.dto.request.recipe.*;
 import com.hackathonteam1.refreshrator.dto.response.file.ImageDto;
 import com.hackathonteam1.refreshrator.dto.response.recipe.DetailRecipeDto;
 import com.hackathonteam1.refreshrator.dto.response.recipe.RecipeListDto;
+import com.hackathonteam1.refreshrator.dto.response.recipeLike.RecipeLikedDataList;
 import com.hackathonteam1.refreshrator.entity.User;
 import com.hackathonteam1.refreshrator.service.ImageService;
 import com.hackathonteam1.refreshrator.service.RecipeService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -30,8 +30,10 @@ public class RecipeController {
     private final ImageService imageService;
 
     @GetMapping
-    public ResponseEntity<ResponseDto<RecipeListDto>> getList(@RequestParam(name = "keyword",defaultValue = "")String keyword, @RequestParam(name = "type", defaultValue = "newest")String type,
-                                                              @RequestParam(name = "page", defaultValue = "0")int page, @RequestParam(name = "size", defaultValue = "10")int size){
+    public ResponseEntity<ResponseDto<RecipeListDto>> getList(@RequestParam(name = "keyword",defaultValue = "")String keyword,
+                                                              @RequestParam(name = "type", defaultValue = "newest")String type,
+                                                              @Min(0) @RequestParam(name = "page", defaultValue = "0")int page,
+                                                              @Min(1) @Max(30) @RequestParam(name = "size", defaultValue = "10")int size){
         RecipeListDto recipeListDto = recipeService.getList(keyword, type, page, size);
         return new ResponseEntity<>(ResponseDto.res(HttpStatus.OK,"레시피 목록 조회 성공", recipeListDto),HttpStatus.OK);
     }
@@ -78,9 +80,9 @@ public class RecipeController {
 
     @GetMapping("/recommendations")
     public ResponseEntity<ResponseDto<RecipeListDto>> getRecommendations(
-            @RequestParam(name = "page", defaultValue = "0")int page,
-            @RequestParam(name = "size", defaultValue = "10")int size,
-            @RequestParam(name = "match", defaultValue = "2147483647")int match,
+            @Min(0) @RequestParam(name = "page", defaultValue = "0")int page,
+            @Min(1) @Max(30) @RequestParam(name = "size", defaultValue = "10")int size,
+            @Min(1) @Max(2147483647) @RequestParam(name = "match", defaultValue = "2147483647")int match,
             @RequestParam(name = "type", defaultValue = "newest")String type,
             @AuthenticatedUser User user){
         RecipeListDto recipeListDto = recipeService.getRecommendation(page, size, match, type, user);
@@ -114,6 +116,13 @@ public class RecipeController {
         imageService.deleteImage(image_Id, user);
         return new ResponseEntity<>(ResponseDto.res(HttpStatus.OK, "이미지 삭제 성공"),HttpStatus.OK);
 
+    }
+
+    @PostMapping("/likes")
+    public ResponseEntity<ResponseDto<RecipeLikedDataList>> getRecipesLiked(
+            @RequestBody RecipeIdListDto recipeIdListDto, @AuthenticatedUser User user){
+        RecipeLikedDataList recipeLikedDataList = recipeService.getRecipesLiked(recipeIdListDto ,user);
+        return new ResponseEntity<>(ResponseDto.res(HttpStatus.OK, "좋아요 여부 조회 성공", recipeLikedDataList), HttpStatus.OK);
     }
 
 }
