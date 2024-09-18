@@ -30,7 +30,7 @@ public enum ErrorCode {
     FRIDGE_ITEM_FORBIDDEN("4031","해당 재료정보에 대한 권한이 없습니다."),
 
     //NotFoundException
-    USERID_NOT_FOUND("4040","존재하지 않는 사용자 입니다"),
+    USER_NOT_FOUND("4040","존재하지 않는 사용자 입니다"),
     INGREDIENT_NOT_FOUND("4041", "재료를 찾을 수 없습니다."),
     RECIPE_NOT_FOUND("4042", "레시피를 찾을 수 없습니다."),
     INGREDIENT_RECIPE_NOT_FOUND("4043", "레시피의 재료를 찾을 수 없습니다."),

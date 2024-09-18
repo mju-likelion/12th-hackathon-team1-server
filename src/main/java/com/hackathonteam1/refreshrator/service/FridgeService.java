@@ -8,6 +8,7 @@ import com.hackathonteam1.refreshrator.entity.Fridge;
 import com.hackathonteam1.refreshrator.entity.FridgeItem;
 import com.hackathonteam1.refreshrator.entity.Ingredient;
 import com.hackathonteam1.refreshrator.entity.User;
+import com.hackathonteam1.refreshrator.exception.ForbiddenException;
 import com.hackathonteam1.refreshrator.exception.NotFoundException;
 import com.hackathonteam1.refreshrator.exception.errorcode.ErrorCode;
 import com.hackathonteam1.refreshrator.repository.FridgeItemRepository;
@@ -60,8 +61,10 @@ public class FridgeService {
         //수정할 재료 찾기
         FridgeItem fridgeItem=findFridgeItem(fridgeItemId);
 
-        //유저가 등록한 재료인지 검사
-        userService.checkAuth(fridgeItem.getFridge().getUser(),user);
+        //재료 접근 권한 확인
+        if(!userService.isAuthorized(fridgeItem.getFridge().getUser(),user)){
+            throw new ForbiddenException(ErrorCode.FRIDGE_ITEM_FORBIDDEN);
+        }
 
         //수정하기
         fridgeItem.setExpiredDate(addFridgeDto.getExpiredDate());
@@ -79,8 +82,10 @@ public class FridgeService {
         //삭제할 재료 찾기
         FridgeItem fridgeItem=findFridgeItem(fridgeItemId);
 
-        //권한 확인
-        userService.checkAuth(fridgeItem.getFridge().getUser(),user);
+        //재료 접근 권한 확인
+        if(!userService.isAuthorized(fridgeItem.getFridge().getUser(),user)){
+            throw new ForbiddenException(ErrorCode.FRIDGE_ITEM_FORBIDDEN);
+        }
 
         //삭제하기
         fridgeItemRepository.delete(fridgeItem);
@@ -125,8 +130,10 @@ public class FridgeService {
         //조회할 재료 찾기
         FridgeItem fridgeItem=findFridgeItem(fridgeItemId);
 
-        //권한 확인
-        userService.checkAuth(fridgeItem.getFridge().getUser(),user);
+        //재료 접근 권한 확인
+        if(!userService.isAuthorized(fridgeItem.getFridge().getUser(),user)){
+            throw new ForbiddenException(ErrorCode.FRIDGE_ITEM_FORBIDDEN);
+        }
 
         //조회 하기
         return FridgeItemResponseData.fromFridgeItem(fridgeItem);

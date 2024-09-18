@@ -7,7 +7,6 @@ import com.hackathonteam1.refreshrator.dto.response.recipe.RecipeDto;
 import com.hackathonteam1.refreshrator.dto.response.recipe.RecipeListDto;
 import com.hackathonteam1.refreshrator.entity.*;
 import com.hackathonteam1.refreshrator.exception.ConflictException;
-import com.hackathonteam1.refreshrator.exception.ForbiddenException;
 import com.hackathonteam1.refreshrator.exception.NotFoundException;
 import com.hackathonteam1.refreshrator.exception.errorcode.ErrorCode;
 import com.hackathonteam1.refreshrator.repository.*;
@@ -24,11 +23,9 @@ import java.util.stream.Collectors;
 @Slf4j
 public class AuthService {
     private final UserRepository userRepository;
-    private final FridgeRepository fridgeRepository;
     private final PasswordHashEncryption passwordHashEncryption;
     private final RecipeLikeRepository recipeLikeRepository;
     private final ImageService imageService;
-
 
     //회원가입
     public void signin(SigninDto signinDto){
@@ -59,16 +56,10 @@ public class AuthService {
     public UUID login(LoginDto loginDto){
 
         //아이디(이메일)검사
-        User user=userRepository.findByEmail(loginDto.getEmail());
+        User user=userService.checkUserByEmail(loginDto.getEmail());
 
-        if(user==null){
-            throw new NotFoundException(ErrorCode.USERID_NOT_FOUND);
-        }
-
-        //비밀번호가 입력한 아이디에 일치하는지 검사
-        if(!passwordHashEncryption.matches(loginDto.getPassword(), user.getPassword())){
-            throw new ForbiddenException(ErrorCode.INVALID_PASSWORD);
-        }
+        ////비밀번호가 입력한 아이디(이메일)에 일치하는지 검사
+        userService.checkPassword(loginDto.getPassword(), user.getPassword());
 
         return user.getId();
     }
