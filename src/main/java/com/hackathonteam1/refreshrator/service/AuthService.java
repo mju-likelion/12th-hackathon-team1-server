@@ -4,8 +4,6 @@ import com.hackathonteam1.refreshrator.authentication.PasswordHashEncryption;
 import com.hackathonteam1.refreshrator.dto.request.auth.LoginDto;
 import com.hackathonteam1.refreshrator.dto.request.auth.SigninDto;
 import com.hackathonteam1.refreshrator.entity.*;
-import com.hackathonteam1.refreshrator.exception.ConflictException;
-import com.hackathonteam1.refreshrator.exception.errorcode.ErrorCode;
 import com.hackathonteam1.refreshrator.repository.*;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +24,7 @@ public class AuthService {
     public void signin(SigninDto signinDto){
 
         //아이디(이메일) 중복 방지
-        checkEmailDuplicated(signinDto.getEmail());
+        userService.checkEmailDuplicated(signinDto.getEmail());
 
         //비밀번호 암호화
         String plainPassword = signinDto.getPassword();
@@ -58,11 +56,4 @@ public class AuthService {
 
         return user.getId();
     }
-
-    private void checkEmailDuplicated(String email){
-        if(userRepository.existsByEmail(email)){
-            throw new ConflictException(ErrorCode.DUPLICATED_EMAIL);
-        }
-    }
-
 }

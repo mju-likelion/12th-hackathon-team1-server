@@ -2,6 +2,7 @@ package com.hackathonteam1.refreshrator.service;
 
 import com.hackathonteam1.refreshrator.authentication.PasswordHashEncryption;
 import com.hackathonteam1.refreshrator.entity.User;
+import com.hackathonteam1.refreshrator.exception.ConflictException;
 import com.hackathonteam1.refreshrator.exception.ForbiddenException;
 import com.hackathonteam1.refreshrator.exception.NotFoundException;
 import com.hackathonteam1.refreshrator.exception.errorcode.ErrorCode;
@@ -21,6 +22,13 @@ public class UserService {
             return false;
         }
         return true;
+    }
+
+    //회원가입시 아이디(이메일) 중복 검사
+    public void checkEmailDuplicated(String email){
+        if(userRepository.existsByEmail(email)){
+            throw new ConflictException(ErrorCode.DUPLICATED_EMAIL);
+        }
     }
 
     //로그인을 위한 아이디(이메일) 검사
