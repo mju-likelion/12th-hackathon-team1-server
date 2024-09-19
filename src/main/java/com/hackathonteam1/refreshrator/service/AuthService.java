@@ -49,10 +49,7 @@ public class AuthService {
     public UUID login(LoginDto loginDto){
 
         //아이디(이메일)검사
-        User user=userService.checkUserByEmail(loginDto.getEmail());
-
-        ////비밀번호가 입력한 아이디(이메일)에 일치하는지 검사
-        userService.checkPassword(loginDto.getPassword(), user.getPassword());
+        User user=userService.checkUserByEmail(loginDto.getEmail(), loginDto.getPassword());
 
         return user.getId();
     }

@@ -3,7 +3,6 @@ package com.hackathonteam1.refreshrator.service;
 import com.hackathonteam1.refreshrator.authentication.PasswordHashEncryption;
 import com.hackathonteam1.refreshrator.entity.User;
 import com.hackathonteam1.refreshrator.exception.ConflictException;
-import com.hackathonteam1.refreshrator.exception.ForbiddenException;
 import com.hackathonteam1.refreshrator.exception.NotFoundException;
 import com.hackathonteam1.refreshrator.exception.errorcode.ErrorCode;
 import com.hackathonteam1.refreshrator.repository.UserRepository;
@@ -32,22 +31,16 @@ public class UserService {
     }
 
     //로그인을 위한 아이디(이메일) 검사
-    public User checkUserByEmail(String email){
-        User user=userRepository.findByEmail(email);
+    public User checkUserByEmail(String email,String password){
 
+        String hashedPassword = passwordHashEncryption.encrypt(password);
+
+        User user=userRepository.findByEmailAndPassword(email,hashedPassword);
         if(user==null){
             throw new NotFoundException(ErrorCode.USER_NOT_FOUND);
         }
 
         return user;
-    }
-
-    //비밀번호가 입력한 아이디(이메일)에 일치하는지 검사
-    public void checkPassword(String inputPassword,String UserPassword){
-
-        if(!passwordHashEncryption.matches(inputPassword, UserPassword)){
-            throw new ForbiddenException(ErrorCode.INVALID_PASSWORD);
-        }
     }
 }
 
