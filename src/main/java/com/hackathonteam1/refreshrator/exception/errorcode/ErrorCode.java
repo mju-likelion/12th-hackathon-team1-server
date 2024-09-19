@@ -23,14 +23,13 @@ public enum ErrorCode {
     //AuthorizedException
     COOKIE_NOT_FOUND("4010", "쿠키를 찾을 수 없습니다."),
     INVALID_TOKEN("4011", "유효하지 않은 토큰입니다."),
-    INVALID_PASSWORD("4012","검증되지 않은 비밀번호입니다."),
 
     //ForbiddenException
     RECIPE_FORBIDDEN("4030","해당 레시피에 대한 권한이 없습니다."),
     FRIDGE_ITEM_FORBIDDEN("4031","해당 재료정보에 대한 권한이 없습니다."),
 
     //NotFoundException
-    USER_NOT_FOUND("4040","존재하지 않는 사용자 입니다"),
+    USER_NOT_FOUND("4040","비밀번호에 일치하는 이메일이 존재하지 않습니다."),
     INGREDIENT_NOT_FOUND("4041", "재료를 찾을 수 없습니다."),
     RECIPE_NOT_FOUND("4042", "레시피를 찾을 수 없습니다."),
     INGREDIENT_RECIPE_NOT_FOUND("4043", "레시피의 재료를 찾을 수 없습니다."),
