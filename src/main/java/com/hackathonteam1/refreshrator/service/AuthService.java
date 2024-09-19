@@ -26,6 +26,7 @@ public class AuthService {
     private final PasswordHashEncryption passwordHashEncryption;
     private final RecipeLikeRepository recipeLikeRepository;
     private final ImageService imageService;
+    private final UserService userService;
 
     //회원가입
     public void signin(SigninDto signinDto){
