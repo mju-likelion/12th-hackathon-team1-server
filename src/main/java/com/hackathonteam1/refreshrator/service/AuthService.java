@@ -3,20 +3,15 @@ package com.hackathonteam1.refreshrator.service;
 import com.hackathonteam1.refreshrator.authentication.PasswordHashEncryption;
 import com.hackathonteam1.refreshrator.dto.request.auth.LoginDto;
 import com.hackathonteam1.refreshrator.dto.request.auth.SigninDto;
-import com.hackathonteam1.refreshrator.dto.response.recipe.RecipeDto;
-import com.hackathonteam1.refreshrator.dto.response.recipe.RecipeListDto;
 import com.hackathonteam1.refreshrator.entity.*;
 import com.hackathonteam1.refreshrator.exception.ConflictException;
-import com.hackathonteam1.refreshrator.exception.NotFoundException;
 import com.hackathonteam1.refreshrator.exception.errorcode.ErrorCode;
 import com.hackathonteam1.refreshrator.repository.*;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -24,8 +19,8 @@ import java.util.stream.Collectors;
 public class AuthService {
     private final UserRepository userRepository;
     private final PasswordHashEncryption passwordHashEncryption;
-    private final RecipeLikeRepository recipeLikeRepository;
     private final ImageService imageService;
+    private final UserService userService;
 
     //회원가입
     public void signin(SigninDto signinDto){

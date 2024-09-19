@@ -18,7 +18,6 @@ import com.hackathonteam1.refreshrator.exception.*;
 
 import com.hackathonteam1.refreshrator.exception.errorcode.ErrorCode;
 import com.hackathonteam1.refreshrator.repository.*;
-import com.hackathonteam1.refreshrator.repository.FridgeRepository;
 import com.hackathonteam1.refreshrator.repository.IngredientRecipeRepository;
 import com.hackathonteam1.refreshrator.repository.RecipeRepository;
 import com.hackathonteam1.refreshrator.util.S3Uploader;

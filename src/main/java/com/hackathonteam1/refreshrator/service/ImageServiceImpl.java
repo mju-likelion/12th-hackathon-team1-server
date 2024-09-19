@@ -4,7 +4,6 @@ import com.hackathonteam1.refreshrator.dto.response.file.ImageDto;
 import com.hackathonteam1.refreshrator.entity.Image;
 import com.hackathonteam1.refreshrator.entity.Recipe;
 import com.hackathonteam1.refreshrator.entity.User;
-import com.hackathonteam1.refreshrator.exception.BadRequestException;
 import com.hackathonteam1.refreshrator.exception.FileStorageException;
 import com.hackathonteam1.refreshrator.exception.NotFoundException;
 import com.hackathonteam1.refreshrator.exception.errorcode.ErrorCode;

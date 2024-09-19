@@ -6,7 +6,6 @@ import com.hackathonteam1.refreshrator.dto.ResponseDto;
 import com.hackathonteam1.refreshrator.dto.request.auth.LoginDto;
 import com.hackathonteam1.refreshrator.dto.request.auth.SigninDto;
 import com.hackathonteam1.refreshrator.dto.response.auth.CookiesResponse;
-import com.hackathonteam1.refreshrator.dto.response.recipe.RecipeListDto;
 import com.hackathonteam1.refreshrator.entity.User;
 import com.hackathonteam1.refreshrator.service.AuthService;
 import com.hackathonteam1.refreshrator.service.TokenService;
