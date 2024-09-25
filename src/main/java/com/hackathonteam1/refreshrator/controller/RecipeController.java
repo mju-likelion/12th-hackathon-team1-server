@@ -1,6 +1,6 @@
 package com.hackathonteam1.refreshrator.controller;
 
-import com.hackathonteam1.refreshrator.annotation.AuthenticatedUser;
+import com.hackathonteam1.refreshrator.annotation.*;
 import com.hackathonteam1.refreshrator.dto.ResponseDto;
 import com.hackathonteam1.refreshrator.dto.request.recipe.*;
 import com.hackathonteam1.refreshrator.dto.response.file.ImageDto;
@@ -11,8 +11,6 @@ import com.hackathonteam1.refreshrator.entity.User;
 import com.hackathonteam1.refreshrator.service.ImageService;
 import com.hackathonteam1.refreshrator.service.RecipeService;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -21,6 +19,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.UUID;
+
+import static com.hackathonteam1.refreshrator.constant.ParameterDefaultValue.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -31,9 +31,9 @@ public class RecipeController {
 
     @GetMapping
     public ResponseEntity<ResponseDto<RecipeListDto>> getList(@RequestParam(name = "keyword",defaultValue = "")String keyword,
-                                                              @RequestParam(name = "type", defaultValue = "newest")String type,
-                                                              @Min(0) @RequestParam(name = "page", defaultValue = "0")int page,
-                                                              @Min(1) @Max(30) @RequestParam(name = "size", defaultValue = "10")int size){
+                                                              @TypeStrategy @RequestParam(name = "type", defaultValue = DEFAULT_TYPE_STRATEGY)String type,
+                                                              @PageNumber @RequestParam(name = "page", defaultValue = DEFAULT_PAGE_NUMBER)int page,
+                                                              @PageSize @RequestParam(name = "size", defaultValue = DEFAULT_PAGE_SIZE)int size){
         RecipeListDto recipeListDto = recipeService.getList(keyword, type, page, size);
         return new ResponseEntity<>(ResponseDto.res(HttpStatus.OK,"레시피 목록 조회 성공", recipeListDto),HttpStatus.OK);
     }
@@ -80,10 +80,10 @@ public class RecipeController {
 
     @GetMapping("/recommendations")
     public ResponseEntity<ResponseDto<RecipeListDto>> getRecommendations(
-            @Min(0) @RequestParam(name = "page", defaultValue = "0")int page,
-            @Min(1) @Max(30) @RequestParam(name = "size", defaultValue = "10")int size,
-            @Min(1) @Max(2147483647) @RequestParam(name = "match", defaultValue = "2147483647")int match,
-            @RequestParam(name = "type", defaultValue = "newest")String type,
+            @PageNumber @RequestParam(name = "page", defaultValue = DEFAULT_PAGE_NUMBER)int page,
+            @PageSize @RequestParam(name = "size", defaultValue = DEFAULT_PAGE_SIZE)int size,
+            @Match @RequestParam(name = "match", defaultValue = DEFAULT_MATCH)int match,
+            @TypeStrategy @RequestParam(name = "type", defaultValue = DEFAULT_TYPE_STRATEGY)String type,
             @AuthenticatedUser User user){
         RecipeListDto recipeListDto = recipeService.getRecommendation(page, size, match, type, user);
         return new ResponseEntity<>(ResponseDto.res(HttpStatus.OK,"추천 레시피 목록 조회 성공", recipeListDto),HttpStatus.OK);
