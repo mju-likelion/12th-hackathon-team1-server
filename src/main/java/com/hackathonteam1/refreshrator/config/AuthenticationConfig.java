@@ -24,7 +24,7 @@ public class AuthenticationConfig implements WebMvcConfigurer {
             "/recipes", "/recipes/{id}", "/recipes/recommendations", "/recipes/images", "/recipes/images/{id}", "/recipes/{id}/ingredients", "/recipes/{id}/likes"
     };
     private static final String[] ADD_PATH_PATTERNS_FRIDGE = { "/fridge/ingredients", "/fridge/ingredients/{id}"};
-    private static final String[] ADD_PATH_PATTERNS_USER = {"/users/me/recipe"};
+    private static final String[] ADD_PATH_PATTERNS_USER = {"/users/me/recipe", "/users/me/likes"};
     private static final String[] EXCLUDE_PATH_PATTERNS_AUTH = {"/auth/signin", "/auth/login", "/auth/refresh"};
 
     //인터셉터 등록 + 경로 설정
