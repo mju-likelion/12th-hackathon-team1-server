@@ -5,6 +5,7 @@ import com.hackathonteam1.refreshrator.dto.response.auth.CookiesResponse;
 import com.hackathonteam1.refreshrator.exception.UnauthorizedException;
 import com.hackathonteam1.refreshrator.exception.errorcode.ErrorCode;
 import com.hackathonteam1.refreshrator.util.AccessTokenUtil;
+import com.hackathonteam1.refreshrator.util.CookieUtil;
 import com.hackathonteam1.refreshrator.util.RefreshTokenUtil;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseCookie;
@@ -13,14 +14,13 @@ import org.springframework.stereotype.Service;
 import java.time.Duration;
 import java.util.UUID;
 
+import static com.hackathonteam1.refreshrator.constant.TokenConstant.*;
+
 @Service
 @AllArgsConstructor
 public class TokenService {
     private final RefreshTokenUtil refreshTokenUtil;
     private final AccessTokenUtil accessTokenUtil;
-
-    private static String ACCESS_TOKEN_NAME = "AccessToken";
-    private static String REFRESH_TOKEN_NAME = "RefreshToken";
 
     //토큰 발급
     public CookiesResponse issueTokenCookies(UUID userId){
@@ -53,48 +53,26 @@ public class TokenService {
         String payload = userId.toString();
         String bearerAccessToken = JwtEncoder.encodeJwtToken(accessTokenUtil.createToken(payload)); //JWT 토큰 생성 후 Bearer 처리
 
-        ResponseCookie responseCookie = ResponseCookie.from(ACCESS_TOKEN_NAME, bearerAccessToken)
-                .maxAge(Duration.ofMillis(1800000))
-                .path("/")
-                .httpOnly(true)
-                .sameSite("None").secure(true)
-                .build();
-        return responseCookie;
+        return CookieUtil.createTokenCookie(
+                ACCESS_TOKEN_NAME, bearerAccessToken, ACCESS_TOKEN_MAX_AGE, ACCESS_TOKEN_PATH);
     }
 
     private ResponseCookie createRefreshTokenCookie(UUID userId){
         String payload = userId.toString();
         String bearerRefreshToken = JwtEncoder.encodeJwtToken(refreshTokenUtil.createToken(payload));
 
-        ResponseCookie responseCookie = ResponseCookie.from(REFRESH_TOKEN_NAME, bearerRefreshToken)
-                .maxAge(Duration.ofDays(14))
-                .path("/auth/refresh")
-                .httpOnly(true)
-                .sameSite("None")
-                .secure(true)
-                .build();
-        return responseCookie;
+        return CookieUtil.createTokenCookie(
+                REFRESH_TOKEN_NAME, bearerRefreshToken, REFRESH_TOKEN_MAX_AGE, REFRESH_TOKEN_PATH);
     }
 
     private ResponseCookie expireAccessTokenCookie(){
-        ResponseCookie responseCookie = ResponseCookie.from(ACCESS_TOKEN_NAME, null)
-                .maxAge(0)
-                .path("/")
-                .httpOnly(true)
-                .sameSite("None").secure(true)
-                .build();
-        return responseCookie;
+        return CookieUtil.createTokenCookie(
+                ACCESS_TOKEN_NAME, null, Duration.ZERO, ACCESS_TOKEN_PATH);
     }
 
     private ResponseCookie expireRefreshTokenCookie(){
-        ResponseCookie responseCookie = ResponseCookie.from(REFRESH_TOKEN_NAME, null)
-                .maxAge(0)
-                .path("/auth/refresh")
-                .httpOnly(true)
-                .sameSite("None")
-                .secure(true)
-                .build();
-        return responseCookie;
+        return CookieUtil.createTokenCookie(
+                REFRESH_TOKEN_NAME, null, Duration.ZERO, REFRESH_TOKEN_PATH);
     }
 
 }
